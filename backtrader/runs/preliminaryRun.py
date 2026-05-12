@@ -38,7 +38,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 import backtrader as bt
 
 # ── Run parameters (mirror tutorialRun.py) ──────────────────────────────────
-N_RUNS = 10
+N_RUNS = 30
 FROM_DATE = datetime.datetime(1999, 1, 1) # 1999: earliest date shared by all 3 feeds
 
 #FROM_DATE = datetime.datetime(2014, 12, 30) #debuggin for the mac
