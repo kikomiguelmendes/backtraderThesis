@@ -39,7 +39,9 @@ import backtrader as bt
 
 # ── Run parameters (mirror tutorialRun.py) ──────────────────────────────────
 N_RUNS = 10
-FROM_DATE = datetime.datetime(1999, 1, 1)  # 1999: earliest date shared by all 3 feeds
+FROM_DATE = datetime.datetime(1999, 1, 1) # 1999: earliest date shared by all 3 feeds
+
+#FROM_DATE = datetime.datetime(2014, 12, 30) #debuggin for the mac
 TO_DATE = datetime.datetime(2014, 12, 31)
 
 
@@ -55,10 +57,6 @@ def _noop_store_cb(msg, *args, **kwargs):
 
 def _noop_data_cb(data, status, *args, **kwargs):
     pass
-
-
-# ── Max-stress strategy ──────────────────────────────────────────────────────
-
 
 class MaxStressStrategy(bt.Strategy):
     """
@@ -78,8 +76,6 @@ class MaxStressStrategy(bt.Strategy):
         d = self.data  # primary data feed (ORCL daily)
 
         # ── Moving averages: 20 periods each ────────────────────────────────
-        # Periods spread across a wide range so they don't collapse into the
-        # same internal computation path.
         sma_periods = range(5, 205, 10)  # [5, 15, 25, … 195]  → 20 indicators
         ema_periods = range(5, 205, 10)  # 20 indicators
 
@@ -156,12 +152,10 @@ if __name__ == "__main__":
     out_dir = os.environ.get("BT_OUTPUT_DIR", os.getcwd())
     os.makedirs(out_dir, exist_ok=True)
 
-    # Start with a clean slate
     sections_file = os.path.join(out_dir, "energy_sections.csv")
-    if os.path.exists(sections_file):
-        os.remove(sections_file)
-        print(f"Cleared previous {sections_file}")
-
+    os.makedirs(os.path.dirname(sections_file), exist_ok=True)
+    with open(sections_file, "w") as f:
+        pass    
     # Data files available in the datas/ directory that cover 1999–2014
     feeds_config = [
         ("orcl-1995-2014.txt", "ORCL"),
@@ -218,32 +212,23 @@ if __name__ == "__main__":
         print(f"Final Portfolio Value:   {cerebro.broker.getvalue():.2f}")
         task_results.append(("strategy_execution", tracker.stop_task()))
 
-    # ── Section: results_analysis ─────────────────────────────────────────────
+    import csv as _csv
+    with open(sections_file, "w", newline="") as f:
+        w = _csv.writer(f)
+        w.writerow(["section", "duration_s", "cpu_energy_kWh", "energy_consumed_kWh"])
+        for name, t in task_results:
+            w.writerow([name, round(t.duration, 6), round(t.cpu_energy, 10), round(t.energy_consumed, 10)])
+
+    print(f"Energy data written to {sections_file} ({len(task_results)} rows)")
+    
     print(f"\n{'='*50}")
     print("All runs complete. Running energy analysis...")
     print(f"{'='*50}\n")
 
-    analysis_script = os.path.abspath(os.path.join(modpath, "backtrader/runs/analyze_energy.py"))
+    analysis_script = os.path.abspath(os.path.join(modpath, "analyze_energy.py"))
     summary_file = os.path.join(out_dir, "energy_summary.csv")
 
-    tracker.start_task("results_analysis")
     subprocess.run(
         [sys.executable, analysis_script, "--sections", sections_file, "--output", summary_file],
         check=True,
     )
-    task_results.append(("results_analysis", tracker.stop_task()))
-
-    total = tracker.stop()
-
-    # ── Write energy_sections.csv ─────────────────────────────────────────────
-    import csv as _csv
-    file_exists = os.path.isfile(sections_file)
-    with open(sections_file, "a", newline="") as f:
-        w = _csv.writer(f)
-        if not file_exists:
-            w.writerow(["section", "duration_s", "cpu_energy_kWh", "energy_consumed_kWh"])
-        for name, t in task_results:
-            w.writerow([name, round(t.duration, 6), round(t.cpu_energy, 10), round(t.energy_consumed, 10)])
-        w.writerow(["_total", round(total.duration, 6), round(total.cpu_energy, 10), round(total.energy_consumed, 10)])
-    print(f"Energy data written to {sections_file} ({len(task_results) + 1} rows)")
-

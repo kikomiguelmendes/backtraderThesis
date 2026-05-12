@@ -11,7 +11,7 @@ import os
 import argparse
 from collections import defaultdict
 
-SECTIONS = ["notifications", "data_feed", "cheat_on_open", "broker", "strategy_next"]
+SECTIONS = ["backtesting_setup", "data_ingestion", "strategy_execution"]
 TOTAL_KEY = "_runnext"
 KWH_TO_J = 3_600_000
 
@@ -47,7 +47,6 @@ def main():
     runnext_j = section_cpu_kwh.get(TOTAL_KEY, 0.0) * KWH_TO_J
     runnext_t = section_duration.get(TOTAL_KEY, 0.0)
     sections_j = sum(section_cpu_kwh.get(s, 0.0) * KWH_TO_J for s in SECTIONS)
-    overhead_j = runnext_j - sections_j
     total_j = runnext_j if runnext_j > 0 else sections_j
     total_t = runnext_t if runnext_t > 0 else sum(section_duration.get(s, 0.0) for s in SECTIONS)
 
@@ -62,9 +61,6 @@ def main():
         mwh = j * 1000 / 3600
         pct = (j / total_j * 100) if total_j > 0 else 0.0
         print(f"  {section:<20} {t:>10.4f} {j:>12.6f} {mwh:>14.8f} {pct:>7.2f}%")
-    overhead_mwh = overhead_j * 1000 / 3600
-    overhead_pct = (overhead_j / total_j * 100) if total_j > 0 else 0.0
-    print(f"  {'overhead':<20} {'-':>10} {overhead_j:>12.6f} {overhead_mwh:>14.8f} {overhead_pct:>7.2f}%")
     print("  " + "-" * 68)
     total_mwh = total_j * 1000 / 3600
     print(
@@ -81,7 +77,6 @@ def main():
             pct = (j / total_j * 100) if total_j > 0 else 0.0
             n = section_count.get(section, 0)
             w.writerow([section, round(t, 6), round(j, 8), round(mwh, 10), round(pct, 4), n])
-        w.writerow(["overhead", "-", round(overhead_j, 8), round(overhead_mwh, 10), round(overhead_pct, 4), "-"])
         n_total = section_count.get(TOTAL_KEY, 0)
         w.writerow([TOTAL_KEY, round(total_t, 6), round(total_j, 8), round(total_mwh, 10), 100.0, n_total])
 

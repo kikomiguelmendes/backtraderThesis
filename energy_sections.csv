@@ -1,0 +1,10 @@
+section,duration_s,cpu_energy_kWh,energy_consumed_kWh
+backtesting_setup,3.240768,7e-10,1.4e-09
+data_ingestion,3.22355,1e-10,5.1e-09
+strategy_execution,3.443033,1.98e-08,2.272e-07
+backtesting_setup,3.211151,1e-10,3.9e-09
+data_ingestion,3.242551,1e-10,5.3e-09
+strategy_execution,3.412902,2.87e-08,2.279e-07
+backtesting_setup,3.214113,1e-10,6e-10
+data_ingestion,3.208746,1e-10,4.8e-09
+strategy_execution,3.444722,1.367e-07,3.382e-07
