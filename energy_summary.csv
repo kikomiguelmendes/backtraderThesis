@@ -1,5 +1,5 @@
 section,total_time_s,energy_J,energy_mWh,share_pct,count
-backtesting_setup,0.296774,14.91084,4.1419,0.1543,30
-data_ingestion,0.265962,6.0534,1.6815,0.0626,30
-strategy_execution,340.251995,9644.58864,2679.0524,99.7831,30
-_runnext,340.814731,9665.55288,2684.8758,100.0,0
+backtesting_setup,9.784196,0.00144,0.0004,1.1494,3
+data_ingestion,9.765025,0.0018,0.0005,1.4368,3
+strategy_execution,10.148339,0.12204,0.0339,97.4138,3
+_runnext,29.69756,0.12528,0.0348,100.0,0
