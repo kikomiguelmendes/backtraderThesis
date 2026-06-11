@@ -1,6 +1,3 @@
-[tool.ruff]
-target-version = "py39"
-
 [tool.ruff.lint]
 select = [
     "PERF", "C4",
@@ -8,11 +5,10 @@ select = [
     "RET504", "RET505", "RET506", "RET507", "RET508",
     "SIM101", "SIM103", "SIM109", "SIM110", "SIM114",
     "SIM116", "SIM118", "SIM401", "SIM905", "SIM911",
-    "F401", "F811", "F841",
-    "PLC0206", "PLC0208", "PLC1802", "PLC3002",
-    "PLR0124", "PLR0133", "PLR1711", "PLR1714", "PLR1733",
-    "PLR1736", "PLR6104", "PLW3301",
-    "FURB163", "FURB168", "FURB171", "FURB192",
-    "RUF005", "RUF015", "RUF017", "RUF019", "RUF046",
-    "RUF051"
+    "F401", "F811", "F841", "PLC0206", "PLC0207", 
+    "PLC0208", "PLC1802", "PLC3002", "PLR0124", 
+    "PLR0133", "PLR1711", "PLR1714", "PLR1733", 
+    "PLR1736", "PLW3301", "FURB163", "FURB168",
+    "FURB171", "RUF005", "RUF015", "RUF017", "RUF019", 
+    "RUF046", "RUF051", "RUF057", "RUF059"
 ]
