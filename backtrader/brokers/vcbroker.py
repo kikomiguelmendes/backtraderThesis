@@ -280,9 +280,9 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
                 order.TimeRestriction = self._otrestriction[Order.T_Day]
 
         # Support for custom user arguments
-        for k in kwargs:
+        for k, value in kwargs.items():
             if hasattr(order, k):
-                setattr(order, k, kwargs[k])
+                setattr(order, k, value)
 
         return order
 

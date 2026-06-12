@@ -192,8 +192,8 @@ class IBOrder(OrderBase, ib.ext.Order.Order):
         self.m_ocaType = 1  # Cancel all remaining orders with block
 
         # pass any custom arguments to the order
-        for k in kwargs:
-            setattr(self, (not hasattr(self, k)) * 'm_' + k, kwargs[k])
+        for k, value in kwargs.items():
+            setattr(self, (not hasattr(self, k)) * 'm_' + k, value)
 
 
 class IBCommInfo(CommInfoBase):
