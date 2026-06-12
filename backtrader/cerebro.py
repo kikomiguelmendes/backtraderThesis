@@ -1514,7 +1514,10 @@ class Cerebro(with_metaclass(MetaParams, object)):
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
             # if any has live data in the buffer, no data will wait anything
-            newqcheck = not any(d.haslivedata() for d in datas)
+            if self.params.live:
+                newqcheck = not any(d.haslivedata() for d in datas)
+            else:
+                newqcheck = False
             if not newqcheck:
                 # If no data has reached the live status or all, wait for
                 # the next incoming data
@@ -1535,12 +1538,19 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # from the qcheck value
             drets = []
             qstart = datetime.datetime.utcnow()
+            qlapse = datetime.datetime.utcnow() - qstart
             for d in datas:
-                qlapse = datetime.datetime.utcnow() - qstart
                 d.do_qcheck(newqcheck, qlapse.total_seconds())
                 drets.append(d.next(ticks=False))
 
-            d0ret = any((dret for dret in drets))
+            d0ret = False
+            for dret in drets:
+                if dret:
+                    d0ret = True
+                    break
+                elif dret is None:
+                    d0ret = None
+
             if not d0ret and any((dret is None for dret in drets)):
                 d0ret = None
 
@@ -1551,12 +1561,12 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
                 # Get index to minimum datetime
                 if onlyresample or noresample:
-                    dt0 = min((d for d in dts if d is not None))
+                    dt0, dt0_idx = min(((d, i) for i, d in enumerate(dts) if d is not None), key=lambda x: x[0])
                 else:
-                    dt0 = min((d for i, d in enumerate(dts)
-                               if d is not None and i not in rsonly))
+                    dt0, dt0_idx = min(((d, i) for i, d in enumerate(dts)
+                                        if d is not None and i not in rsonly), key=lambda x: x[0])
 
-                dmaster = datas[dts.index(dt0)]  # and timemaster
+                dmaster = datas[dt0_idx]  # and timemaster
                 self._dtmaster = dmaster.num2date(dt0)
                 self._udtmaster = num2date(dt0)
 
@@ -1580,10 +1590,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 for i, dti in enumerate(dts):
                     if dti is not None:
                         di = datas[i]
-                        rpi = False and di.replaying   # to check behavior
                         if dti > dt0:
-                            if not rpi:  # must see all ticks ...
-                                di.rewind()  # cannot deliver yet
+                            di.rewind()  # cannot deliver yet
                             # self._plotfillers[i].append(slen)
                         elif not di.replaying:
                             # Replay forces tick fill, else force here
