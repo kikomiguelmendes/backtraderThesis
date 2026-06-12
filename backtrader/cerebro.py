@@ -1213,10 +1213,14 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         for stratcls, sargs, skwargs in iterstrat:
             sargs = self.datas + list(sargs)
+            indicator.Indicator.cleancache()
+            indicator.Indicator.usecache(True)
             try:
                 strat = stratcls(*sargs, **skwargs)
             except bt.errors.StrategySkipError:
                 continue  # do not add strategy to the mix
+            finally:
+                indicator.Indicator.usecache(False)
 
             if self.p.oldsync:
                 strat._oldsync = True  # tell strategy to use old clock update
