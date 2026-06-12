@@ -1295,7 +1295,39 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 if self.p.oldsync:
                     self._runnext_old(runstrats)
                 else:
-                    self._runnext(runstrats)
+                    import csv as _csv
+                    import os as _os
+                    from codecarbon import EmissionsTracker
+
+                    tracker = EmissionsTracker(
+                        measure_power_secs=1,
+                        log_level="error",
+                        save_to_file=False,
+                    )
+                    tracker.start()
+                    try:
+                        self._runnext(runstrats)
+                    finally:
+                        tracker.stop()
+                        _total = tracker.final_emissions_data
+
+                        _out_dir = _os.environ.get("BT_OUTPUT_DIR", ".")
+                        _csv_path = _os.path.join(_out_dir, "energy_runnext.csv")
+                        _file_exists = _os.path.isfile(_csv_path)
+                        with open(_csv_path, "a", newline="") as _f:
+                            _w = _csv.writer(_f)
+                            if not _file_exists:
+                                _w.writerow([
+                                    "duration_s",
+                                    "cpu_energy_kWh",
+                                    "energy_consumed_kWh",
+                                ])
+                            _w.writerow([
+                                round(_total.duration, 6),
+                                round(_total.cpu_energy, 10),
+                                round(_total.energy_consumed, 10),
+                            ])
+                        print(f"Energy data appended to {_csv_path}")
 
             for strat in runstrats:
                 strat._stop()
