@@ -83,10 +83,8 @@ class DataSeries(LineSeries):
 
         if l:
             values.append(self.datetime.datetime(0))
-            for line in self.LineOrder[1:]:
-                values.append(self.lines[line][0])
-            for i in range(len(self.LineOrder), self.lines.size()):
-                values.append(self.lines[i][0])
+            values.extend([self.lines[line][0] for line in self.LineOrder[1:]])
+            values.extend([self.lines[i][0] for i in range(len(self.LineOrder), self.lines.size())])
         else:
             values.extend([''] * self.lines.size())  # no values yet
 

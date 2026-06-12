@@ -513,15 +513,10 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
             # Ids are delivered in different fields and all must be fetched to
             # match them (as executions) to the order generated here
-            oids = []
-            for oidfield in self._OIDSINGLE:
-                if oidfield in o and 'id' in o[oidfield]:
-                    oids.append(o[oidfield]['id'])
-
-            for oidfield in self._OIDMULTIPLE:
-                if oidfield in o:
-                    for suboidfield in o[oidfield]:
-                        oids.append(suboidfield['id'])
+            oids = [o[oidfield]['id'] for oidfield in self._OIDSINGLE
+                    if oidfield in o and 'id' in o[oidfield]]
+            oids += [suboidfield['id'] for oidfield in self._OIDMULTIPLE
+                     if oidfield in o for suboidfield in o[oidfield]]
 
             if not oids:
                 self.broker._reject(oref)
