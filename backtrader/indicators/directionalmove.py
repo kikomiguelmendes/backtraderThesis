@@ -78,7 +78,7 @@ class _DirectionalIndicator(Indicator):
     '''
     params = (('period', 14), ('movav', MovAv.Smoothed))
 
-    plotlines = dict(plusDI=dict(_name='+DI'), minusDI=dict(_name='-DI'))
+    plotlines = {'plusDI': {'_name': '+DI'}, 'minusDI': {'_name': '-DI'}}
 
     def _plotlabel(self):
         plabels = [self.p.period]
@@ -177,7 +177,7 @@ class PlusDirectionalIndicator(_DirectionalIndicator):
     alias = (('PlusDI', '+DI'),)
     lines = ('plusDI',)
 
-    plotinfo = dict(plotname='+DirectionalIndicator')
+    plotinfo = {'plotname': '+DirectionalIndicator'}
 
     def __init__(self):
         super(PlusDirectionalIndicator, self).__init__(_minus=False)
@@ -215,7 +215,7 @@ class MinusDirectionalIndicator(_DirectionalIndicator):
     alias = (('MinusDI', '-DI'),)
     lines = ('minusDI',)
 
-    plotinfo = dict(plotname='-DirectionalIndicator')
+    plotinfo = {'plotname': '-DirectionalIndicator'}
 
     def __init__(self):
         super(MinusDirectionalIndicator, self).__init__(_plus=False)
@@ -258,7 +258,7 @@ class AverageDirectionalMovementIndex(_DirectionalIndicator):
 
     lines = ('adx',)
 
-    plotlines = dict(adx=dict(_name='ADX'))
+    plotlines = {'adx': {'_name': 'ADX'}}
 
     def __init__(self):
         super(AverageDirectionalMovementIndex, self).__init__()
@@ -304,7 +304,7 @@ class AverageDirectionalMovementIndexRating(AverageDirectionalMovementIndex):
     alias = ('ADXR',)
 
     lines = ('adxr',)
-    plotlines = dict(adxr=dict(_name='ADXR'))
+    plotlines = {'adxr': {'_name': 'ADXR'}}
 
     def __init__(self):
         super(AverageDirectionalMovementIndexRating, self).__init__()

@@ -61,7 +61,7 @@ class LogReturns(bt.Observer):
     _stclock = True
 
     lines = ('logret1',)
-    plotinfo = dict(plot=True, subplot=True)
+    plotinfo = {'plot': True, 'subplot': True}
 
     params = (
         ('timeframe', None),

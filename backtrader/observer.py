@@ -29,7 +29,7 @@ from backtrader.utils.py3 import with_metaclass
 class MetaObserver(ObserverBase.__class__):
     def donew(cls, *args, **kwargs):
         _obj, args, kwargs = super(MetaObserver, cls).donew(*args, **kwargs)
-        _obj._analyzers = list()  # keep children analyzers
+        _obj._analyzers = []  # keep children analyzers
 
         return _obj, args, kwargs  # return the instantiated object and args
 
@@ -51,7 +51,7 @@ class Observer(with_metaclass(MetaObserver, ObserverBase)):
 
     csv = True
 
-    plotinfo = dict(plot=False, subplot=True)
+    plotinfo = {"plot": False, "subplot": True}
 
     # An Observer is ideally always observing and that' why prenext calls
     # next. The behaviour can be overriden by subclasses

@@ -51,7 +51,7 @@ class HeikinAshi(bt.Indicator):
         ('ha_close', 'close',),
     )
 
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}
 
     _nextforce = True
 

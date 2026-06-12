@@ -45,8 +45,8 @@ class MACD(Indicator):
     params = (('period_me1', 12), ('period_me2', 26), ('period_signal', 9),
               ('movav', MovAv.Exponential),)
 
-    plotinfo = dict(plothlines=[0.0])
-    plotlines = dict(signal=dict(ls='--'))
+    plotinfo = {'plothlines': [0.0]}
+    plotlines = {'signal': {'ls': '--'}}
 
     def _plotlabel(self):
         plabels = super(MACD, self)._plotlabel()
@@ -77,7 +77,7 @@ class MACDHisto(MACD):
     alias = ('MACDHistogram',)
 
     lines = ('histo',)
-    plotlines = dict(histo=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = {'histo': {'_method': 'bar', 'alpha': 0.50, 'width': 1.0}}
 
     def __init__(self):
         super(MACDHisto, self).__init__()

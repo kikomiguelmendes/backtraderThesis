@@ -45,8 +45,8 @@ class WilliamsR(Indicator):
               ('upperband', -20.0),
               ('lowerband', -80.0),)
 
-    plotinfo = dict(plotname='Williams R%')
-    plotlines = dict(percR=dict(_name='R%'))
+    plotinfo = {'plotname': 'Williams R%'}
+    plotlines = {'percR': {'_name': 'R%'}}
 
     def _plotinif(self):
         self.plotinfo.plotyhlines = [self.p.upperband, self.p.lowerband]

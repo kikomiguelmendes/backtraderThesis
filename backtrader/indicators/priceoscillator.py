@@ -28,7 +28,7 @@ class _PriceOscBase(Indicator):
     params = (('period1', 12), ('period2', 26),
               ('_movav', MovAv.Exponential),)
 
-    plotinfo = dict(plothlines=[0.0])
+    plotinfo = {'plothlines': [0.0]}
 
     def __init__(self):
         self.ma1 = self.p._movav(self.data, period=self.p.period1)
@@ -76,7 +76,7 @@ class PercentagePriceOscillator(_PriceOscBase):
     lines = ('ppo', 'signal', 'histo')
     params = (('period_signal', 9),)
 
-    plotlines = dict(histo=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = {'histo': {'_method': 'bar', 'alpha': 0.50, 'width': 1.0}}
 
     def __init__(self):
         super(PercentagePriceOscillator, self).__init__()

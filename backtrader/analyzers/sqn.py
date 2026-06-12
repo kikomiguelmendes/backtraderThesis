@@ -62,7 +62,7 @@ class SQN(Analyzer):
 
     def start(self):
         super(SQN, self).start()
-        self.pnl = list()
+        self.pnl = []
         self.count = 0
 
     def notify_trade(self, trade):

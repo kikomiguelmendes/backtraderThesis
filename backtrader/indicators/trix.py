@@ -48,7 +48,7 @@ class Trix(Indicator):
     lines = ('trix',)
     params = (('period', 15), ('_rocperiod', 1), ('_movav', MovAv.EMA),)
 
-    plotinfo = dict(plothlines=[0.0])
+    plotinfo = {'plothlines': [0.0]}
 
     def _plotlabel(self):
         plabels = [self.p.period]

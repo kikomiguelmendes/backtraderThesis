@@ -29,7 +29,7 @@ from .utils.py3 import zip, string_types, with_metaclass
 
 
 def findbases(kls, topclass):
-    retval = list()
+    retval = []
     for base in kls.__bases__:
         if issubclass(base, topclass):
             retval.extend(findbases(base, topclass))
@@ -304,8 +304,8 @@ class ItemCollection(object):
       - Name (if set in the append operation)
     '''
     def __init__(self):
-        self._items = list()
-        self._names = list()
+        self._items = []
+        self._names = []
 
     def __len__(self):
         return len(self._items)

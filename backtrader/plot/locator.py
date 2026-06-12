@@ -45,7 +45,7 @@ def _idx2dt(idx, dates, tz):
 
     ldates = len(dates)
 
-    idx = int(round(idx))
+    idx = round(idx)
     if idx >= ldates:
         idx = ldates - 1
     if idx < 0:
@@ -241,7 +241,7 @@ class AutoDateFormatter(ADFormatter):
 
     def __call__(self, x, pos=None):
         '''Return the label for time x at position pos'''
-        x = int(round(x))
+        x = round(x)
         ldates = len(self._dates)
         if x >= ldates:
             x = ldates - 1

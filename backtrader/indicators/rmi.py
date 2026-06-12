@@ -48,7 +48,7 @@ class RelativeMomentumIndex(RSI):
     alias = ('RMI', )
 
     linealias = (('rsi', 'rmi',),)  # add an alias for this class rmi -> rsi
-    plotlines = dict(rsi=dict(_name='rmi'))  # change line plotting name
+    plotlines = {'rsi': {'_name': 'rmi'}}  # change line plotting name
 
     params = (
         ('period', 20),

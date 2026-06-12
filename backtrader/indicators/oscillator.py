@@ -41,7 +41,7 @@ class OscillatorMixIn(Indicator):
       - XXX calculates lines[0]
       - osc = self.data - XXX.lines[0]
     '''
-    plotlines = dict(_0=dict(_name='osc'))
+    plotlines = {'_0': {'_name': 'osc'}}
 
     def _plotinit(self):
         try:
@@ -78,7 +78,7 @@ class Oscillator(Indicator):
     lines = ('osc',)
 
     # Have a default value which can be later modified if needed
-    plotlines = dict(_0=dict(_name='osc'))
+    plotlines = {'_0': {'_name': 'osc'}}
 
     def _plotinit(self):
         try:

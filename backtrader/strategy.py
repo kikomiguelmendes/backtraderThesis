@@ -39,7 +39,7 @@ from .utils import AutoOrderedDict, AutoDictList
 
 
 class MetaStrategy(StrategyBase.__class__):
-    _indcol = dict()
+    _indcol = {}
 
     def __new__(meta, name, bases, dct):
         # Hack to support original method name for notify_order
@@ -77,17 +77,17 @@ class MetaStrategy(StrategyBase.__class__):
             super(MetaStrategy, cls).dopreinit(_obj, *args, **kwargs)
         _obj.broker = _obj.env.broker
         _obj._sizer = bt.sizers.FixedSize()
-        _obj._orders = list()
-        _obj._orderspending = list()
+        _obj._orders = []
+        _obj._orderspending = []
         _obj._trades = collections.defaultdict(AutoDictList)
-        _obj._tradespending = list()
+        _obj._tradespending = []
 
         _obj.stats = _obj.observers = ItemCollection()
         _obj.analyzers = ItemCollection()
         _obj._alnames = collections.defaultdict(itertools.count)
-        _obj.writers = list()
+        _obj.writers = []
 
-        _obj._slave_analyzers = list()
+        _obj._slave_analyzers = []
 
         _obj._tradehistoryon = False
 
@@ -187,7 +187,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
             _dminperiods[clk].append(lineiter._minperiod)
 
-        self._minperiods = list()
+        self._minperiods = []
         for data in self.datas:
 
             # Do not only consider the data as clock but also its lines which
@@ -256,7 +256,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.stats.append(obs, obsname)
             return
 
-        setattr(self.stats, obsname, list())
+        setattr(self.stats, obsname, [])
         l = getattr(self.stats, obsname)
 
         for data in self.datas:
@@ -421,7 +421,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.getindicators_lines(), self.getobservers())
         self.indobscsv.extend(filter(lambda x: x.csv, indobs))
 
-        headers = list()
+        headers = []
 
         # prepare the indicators/observers data headers
         for iocsv in self.indobscsv:
@@ -433,7 +433,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         return headers
 
     def getwritervalues(self):
-        values = list()
+        values = []
 
         for iocsv in self.indobscsv:
             name = iocsv.plotinfo.plotname or iocsv.__class__.__name__
@@ -495,8 +495,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def clear(self):
         self._orders.extend(self._orderspending)
-        self._orderspending = list()
-        self._tradespending = list()
+        self._orderspending = []
+        self._tradespending = []
 
     def _addnotification(self, order, quicknotify=False):
         if not order.p.simulated:
@@ -1133,10 +1133,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             ``None``
         '''
 
-        kargs = dict(size=size,
-                     data=data, price=price, plimit=plimit, exectype=exectype,
-                     valid=valid, tradeid=tradeid,
-                     trailamount=trailamount, trailpercent=trailpercent)
+        kargs = {'size': size,
+                     'data': data, 'price': price, 'plimit': plimit, 'exectype': exectype,
+                     'valid': valid, 'tradeid': tradeid,
+                     'trailamount': trailamount, 'trailpercent': trailpercent}
         kargs.update(oargs)
         kargs.update(kwargs)
         kargs['transmit'] = limitexec is None and stopexec is None
@@ -1144,8 +1144,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if stopexec is not None:
             # low side / stop
-            kargs = dict(data=data, price=stopprice, exectype=stopexec,
-                         valid=valid, tradeid=tradeid)
+            kargs = {'data': data, 'price': stopprice, 'exectype': stopexec,
+                         'valid': valid, 'tradeid': tradeid}
             kargs.update(stopargs)
             kargs.update(kwargs)
             kargs['parent'] = o
@@ -1157,8 +1157,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if limitexec is not None:
             # high side / limit
-            kargs = dict(data=data, price=limitprice, exectype=limitexec,
-                         valid=valid, tradeid=tradeid)
+            kargs = {'data': data, 'price': limitprice, 'exectype': limitexec,
+                         'valid': valid, 'tradeid': tradeid}
             kargs.update(limitargs)
             kargs.update(kwargs)
             kargs['parent'] = o
@@ -1205,10 +1205,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             ``None``
         '''
 
-        kargs = dict(size=size,
-                     data=data, price=price, plimit=plimit, exectype=exectype,
-                     valid=valid, tradeid=tradeid,
-                     trailamount=trailamount, trailpercent=trailpercent)
+        kargs = {'size': size,
+                     'data': data, 'price': price, 'plimit': plimit, 'exectype': exectype,
+                     'valid': valid, 'tradeid': tradeid,
+                     'trailamount': trailamount, 'trailpercent': trailpercent}
         kargs.update(oargs)
         kargs.update(kwargs)
         kargs['transmit'] = limitexec is None and stopexec is None
@@ -1216,8 +1216,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if stopexec is not None:
             # high side / stop
-            kargs = dict(data=data, price=stopprice, exectype=stopexec,
-                         valid=valid, tradeid=tradeid)
+            kargs = {'data': data, 'price': stopprice, 'exectype': stopexec,
+                         'valid': valid, 'tradeid': tradeid}
             kargs.update(stopargs)
             kargs.update(kwargs)
             kargs['parent'] = o
@@ -1229,8 +1229,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if limitexec is not None:
             # low side / limit
-            kargs = dict(data=data, price=limitprice, exectype=limitexec,
-                         valid=valid, tradeid=tradeid)
+            kargs = {'data': data, 'price': limitprice, 'exectype': limitexec,
+                         'valid': valid, 'tradeid': tradeid}
             kargs.update(limitargs)
             kargs.update(kwargs)
             kargs['parent'] = o
@@ -1367,7 +1367,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         elif data is None:
             data = self.data
 
-        possize = self.getposition(data, self.broker).size
+        self.getposition(data, self.broker).size
         target *= self.broker.getvalue()
 
         return self.order_target_value(data=data, target=target, **kwargs)

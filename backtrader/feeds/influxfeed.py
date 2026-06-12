@@ -26,16 +26,14 @@ import backtrader.feed as feed
 from ..utils import date2num
 import datetime as dt
 
-TIMEFRAMES = dict(
-    (
-        (bt.TimeFrame.Seconds, 's'),
-        (bt.TimeFrame.Minutes, 'm'),
-        (bt.TimeFrame.Days, 'd'),
-        (bt.TimeFrame.Weeks, 'w'),
-        (bt.TimeFrame.Months, 'm'),
-        (bt.TimeFrame.Years, 'y'),
-    )
-)
+TIMEFRAMES = {
+    bt.TimeFrame.Seconds: 's',
+        bt.TimeFrame.Minutes: 'm',
+        bt.TimeFrame.Days: 'd',
+        bt.TimeFrame.Weeks: 'w',
+        bt.TimeFrame.Months: 'm',
+        bt.TimeFrame.Years: 'y',
+}
 
 
 class InfluxDB(feed.DataBase):

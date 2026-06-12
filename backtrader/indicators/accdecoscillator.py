@@ -51,7 +51,7 @@ class AccelerationDecelerationOscillator(bt.Indicator):
         ('movav', MovAv.SMA),
     )
 
-    plotlines = dict(accde=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = {'accde': {'_method': 'bar', 'alpha': 0.50, 'width': 1.0}}
 
     def __init__(self):
         ao = AwesomeOscillator()

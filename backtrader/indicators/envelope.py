@@ -46,7 +46,7 @@ class EnvelopeMixIn(object):
     '''
     lines = ('top', 'bot',)
     params = (('perc', 2.5),)
-    plotlines = dict(top=dict(_samecolor=True), bot=dict(_samecolor=True),)
+    plotlines = {'top': {'_samecolor': True}, 'bot': {'_samecolor': True},}
 
     def __init__(self):
         # Mix-in & directly from object -> does not necessarily need super
@@ -63,10 +63,10 @@ class _EnvelopeBase(Indicator):
     lines = ('src',)
 
     # plot the envelope lines along the passed source
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}
 
     # Do not replot the data line
-    plotlines = dict(src=dict(_plotskip=True))
+    plotlines = {'src': {'_plotskip': True}}
 
     def __init__(self):
         self.lines.src = self.data

@@ -109,7 +109,7 @@ def PumpEvents(timeout=-1, hevt=None, cb=None):
         tmout = int(tmout)
 
         try:
-            res = ctypes.oledll.ole32.CoWaitForMultipleHandles(
+            ctypes.oledll.ole32.CoWaitForMultipleHandles(
                 0,  # COWAIT_FLAGS
                 int(tmout),  # dwtimeout
                 len(handles),  # number of handles in handles
@@ -304,8 +304,8 @@ class VCStore(with_metaclass(MetaSingleton, object)):
 
         # hold deques to market data symbols
         self._dqs = collections.deque()
-        self._qdatas = dict()
-        self._tftable = dict()
+        self._qdatas = {}
+        self._tftable = {}
 
         if not self._load_comtypes():
             txt = 'Failed to import comtypes'
@@ -348,7 +348,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         self._connected = True
 
         # Build a table of VCRT Field_XX mappings for debugging purposes
-        self.vcrtfields = dict()
+        self.vcrtfields = {}
         for name in dir(self.vcrtmod):
             if name.startswith('Field'):
                 self.vcrtfields[getattr(self.vcrtmod, name)] = name
@@ -371,7 +371,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
     def get_notifications(self):
         '''Return the pending "store" notifications'''
         self.notifs.append(None)  # Mark current end of notifs
-        return [x for x in iter(self.notifs.popleft, None)]  # popleft til None
+        return list(iter(self.notifs.popleft, None))  # popleft til None
 
     def start(self, data=None, broker=None):
         if not self._connected:
@@ -399,7 +399,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         self.comtypes.CoInitialize()  # running in another thread
         vcrt = self.CreateObject(self.vcrtmod.RealTime)
         sink = RTEventSink(self)
-        conn = self.GetEvents(vcrt, sink)
+        self.GetEvents(vcrt, sink)
         PumpEvents()
         self.comtypes.CoUninitialize()
 
@@ -441,7 +441,7 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         self._qdatas.pop(q)
 
     def _rtdata(self, data, symbol):
-        kwargs = dict(data=data, symbol=symbol)
+        kwargs = {'data': data, 'symbol': symbol}
         t = threading.Thread(target=self._t_rtdata, kwargs=kwargs)
         t.daemon = True
         t.start()

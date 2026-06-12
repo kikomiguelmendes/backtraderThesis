@@ -51,13 +51,13 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
     )
 
     def __init__(self):
-        self.comminfo = dict()
+        self.comminfo = {}
         self.init()
 
     def init(self):
         # called from init and from start
         if None not in self.comminfo:
-            self.comminfo = dict({None: self.p.commission})
+            self.comminfo = {None: self.p.commission}
 
     def start(self):
         self.init()

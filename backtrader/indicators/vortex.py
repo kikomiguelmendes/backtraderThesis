@@ -34,7 +34,7 @@ class Vortex(bt.Indicator):
 
     params = (('period', 14),)
 
-    plotlines = dict(vi_plus=dict(_name='+VI'), vi_minus=dict(_name='-VI'))
+    plotlines = {'vi_plus': {'_name': '+VI'}, 'vi_minus': {'_name': '-VI'}}
 
     def __init__(self):
         h0l1 = abs(self.data.high(0) - self.data.low(-1))

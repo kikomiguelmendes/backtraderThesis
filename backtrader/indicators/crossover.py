@@ -64,7 +64,7 @@ class _CrossBase(Indicator):
 
     lines = ('cross',)
 
-    plotinfo = dict(plotymargin=0.05, plotyhlines=[0.0, 1.0])
+    plotinfo = {'plotymargin': 0.05, 'plotyhlines': [0.0, 1.0]}
 
     def __init__(self):
         nzd = NonZeroDifference(self.data0, self.data1)
@@ -129,7 +129,7 @@ class CrossOver(Indicator):
 
     lines = ('crossover',)
 
-    plotinfo = dict(plotymargin=0.05, plotyhlines=[-1.0, 1.0])
+    plotinfo = {'plotymargin': 0.05, 'plotyhlines': [-1.0, 1.0]}
 
     def __init__(self):
         upcross = CrossUp(self.data, self.data1)

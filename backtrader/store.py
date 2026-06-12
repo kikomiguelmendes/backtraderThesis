@@ -68,7 +68,7 @@ class Store(with_metaclass(MetaSingleton, object)):
         if not self._started:
             self._started = True
             self.notifs = collections.deque()
-            self.datas = list()
+            self.datas = []
             self.broker = None
 
         if data is not None:
@@ -91,4 +91,4 @@ class Store(with_metaclass(MetaSingleton, object)):
     def get_notifications(self):
         '''Return the pending "store" notifications'''
         self.notifs.append(None)  # put a mark / threads could still append
-        return [x for x in iter(self.notifs.popleft, None)]
+        return list(iter(self.notifs.popleft, None))

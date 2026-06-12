@@ -38,7 +38,7 @@ class Momentum(Indicator):
     '''
     lines = ('momentum',)
     params = (('period', 12),)
-    plotinfo = dict(plothlines=[0.0])
+    plotinfo = {'plothlines': [0.0]}
 
     def __init__(self):
         self.l.momentum = self.data - self.data(-self.p.period)
@@ -65,8 +65,7 @@ class MomentumOscillator(Indicator):
               ('band', 100.0))
 
     def _plotlabel(self):
-        plabels = [self.p.period]
-        return plabels
+        return [self.p.period]
 
     def _plotinit(self):
         self.plotinfo.plothlines = [self.p.band]

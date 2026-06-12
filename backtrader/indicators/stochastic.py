@@ -30,8 +30,8 @@ class _StochasticBase(Indicator):
               ('upperband', 80.0), ('lowerband', 20.0),
               ('safediv', False), ('safezero', 0.0))
 
-    plotlines = dict(percD=dict(_name='%D', ls='--'),
-                     percK=dict(_name='%K'))
+    plotlines = {'percD': {'_name': '%D', 'ls': '--'},
+                     'percK': {'_name': '%K'}}
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.period_dfast]
@@ -133,7 +133,7 @@ class StochasticFull(_StochasticBase):
     lines = ('percDSlow',)
     params = (('period_dslow', 3),)
 
-    plotlines = dict(percDSlow=dict(_name='%DSlow'))
+    plotlines = {'percDSlow': {'_name': '%DSlow'}}
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.period_dfast, self.p.period_dslow]

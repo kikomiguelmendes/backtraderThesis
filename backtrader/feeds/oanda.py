@@ -182,7 +182,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
 
         # Create attributes as soon as possible
         self._statelivereconn = False  # if reconnecting in live state
-        self._storedmsg = dict()  # keep pending live message (under None)
+        self._storedmsg = {}  # keep pending live message (under None)
         self.qlive = queue.Queue()
         self._state = self._ST_OVER
 

@@ -149,20 +149,20 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     _mindatas = 1
     _ltype = LineSeries.IndType
 
-    plotinfo = dict(plot=True,
-                    subplot=True,
-                    plotname='',
-                    plotskip=False,
-                    plotabove=False,
-                    plotlinelabels=False,
-                    plotlinevalues=True,
-                    plotvaluetags=True,
-                    plotymargin=0.0,
-                    plotyhlines=[],
-                    plotyticks=[],
-                    plothlines=[],
-                    plotforce=False,
-                    plotmaster=None,)
+    plotinfo = {'plot': True,
+                    'subplot': True,
+                    'plotname': '',
+                    'plotskip': False,
+                    'plotabove': False,
+                    'plotlinelabels': False,
+                    'plotlinevalues': True,
+                    'plotvaluetags': True,
+                    'plotymargin': 0.0,
+                    'plotyhlines': [],
+                    'plotyticks': [],
+                    'plothlines': [],
+                    'plotforce': False,
+                    'plotmaster': None,}
 
     def _periodrecalc(self):
         # last check in case not all lineiterators were assigned to

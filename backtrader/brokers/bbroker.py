@@ -259,7 +259,7 @@ class BackBroker(bt.BrokerBase):
         self._leverage = 1.0  # initially nothing is open
         self._unrealized = 0.0  # no open position
 
-        self.orders = list()  # will only be appending
+        self.orders = []  # will only be appending
         self.pending = collections.deque()  # popleft and append(right)
         self._toactivate = collections.deque()  # to activate in next cycle
 
@@ -272,7 +272,7 @@ class BackBroker(bt.BrokerBase):
         # to keep dependent orders if needed
         self._pchildren = collections.defaultdict(collections.deque)
 
-        self._ocos = dict()
+        self._ocos = {}
         self._ocol = collections.defaultdict(list)
 
         self._fundval = self.p.fundstartval
@@ -459,7 +459,7 @@ class BackBroker(bt.BrokerBase):
                 pos_value_unlever += dvalue
 
         if not self._fundhist:
-            self._value = v = self.cash + pos_value_unlever
+            self._value = self.cash + pos_value_unlever
             self._fundval = self._value / self._fundshares  # update fundvalue
         else:
             # Try to fetch a value
@@ -499,7 +499,7 @@ class BackBroker(bt.BrokerBase):
         if safe:
             os = [x.clone() for x in self.pending]
         else:
-            os = [x for x in self.pending]
+            os = list(self.pending)
 
         return os
 
@@ -556,7 +556,7 @@ class BackBroker(bt.BrokerBase):
 
     def check_submitted(self):
         cash = self.cash
-        positions = dict()
+        positions = {}
 
         while self.submitted:
             order = self.submitted.popleft()
@@ -564,7 +564,7 @@ class BackBroker(bt.BrokerBase):
             if self._take_children(order) is None:  # children not taken
                 continue
 
-            comminfo = self.getcommissioninfo(order.data)
+            self.getcommissioninfo(order.data)
 
             position = positions.setdefault(
                 order.data, self.positions[order.data].clone())
@@ -850,7 +850,6 @@ class BackBroker(bt.BrokerBase):
         self._execute(order, ago=0, price=order.created.price)
 
     def _try_exec_market(self, order, popen, phigh, plow):
-        ago = 0
         if self.p.coc and order.info.get('coc', True):
             dtcoc = order.created.dt
             exprice = order.created.pclose
@@ -909,7 +908,7 @@ class BackBroker(bt.BrokerBase):
         else:  # Sell
             if plimit <= popen:
                 # open greater/equal than requested - sell more expensive
-                pmin = max(plow, plimit)
+                max(plow, plimit)
                 p = self._slip_down(plimit, popen, doslip=self.p.slip_open,
                                     lim=True)
                 self._execute(order, ago=0, price=p)
@@ -1156,14 +1155,14 @@ class BackBroker(bt.BrokerBase):
                 price = uhorder[2]
                 owner = self.cerebro.runningstrats[0]
                 if size > 0:
-                    o = self.buy(owner=owner, data=d,
+                    self.buy(owner=owner, data=d,
                                  size=size, price=price,
                                  exectype=Order.Historical,
                                  histnotify=uhnotify,
                                  _checksubmit=False)
 
                 elif size < 0:
-                    o = self.sell(owner=owner, data=d,
+                    self.sell(owner=owner, data=d,
                                   size=abs(size), price=price,
                                   exectype=Order.Historical,
                                   histnotify=uhnotify,

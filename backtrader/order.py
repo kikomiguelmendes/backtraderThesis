@@ -215,8 +215,7 @@ class OrderData(object):
 
     def clone(self):
         self.markpending()
-        obj = copy(self)
-        return obj
+        return copy(self)
 
 
 class OrderBase(with_metaclass(MetaParams, object)):
@@ -278,7 +277,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
             super(Order, self).__setattribute__(name, value)
 
     def __str__(self):
-        tojoin = list()
+        tojoin = []
         tojoin.append('Ref: {}'.format(self.ref))
         tojoin.append('OrdType: {}'.format(self.ordtype))
         tojoin.append('OrdType: {}'.format(self.ordtypename()))

@@ -329,7 +329,7 @@ class VolumePlotHandler(object):
             return (left, vbot), (left, v), (right, v), (right, vbot)
 
         barareas = [volbar(i, v) for i, v in zip(x, vols)]
-        barcol = mcol.PolyCollection(
+        return mcol.PolyCollection(
             barareas,
             facecolors=colors,
             edgecolors=edgecolors,
@@ -337,7 +337,6 @@ class VolumePlotHandler(object):
             linewidths=(0.5,),
             **kwargs)
 
-        return barcol
 
 
 def plot_volume(

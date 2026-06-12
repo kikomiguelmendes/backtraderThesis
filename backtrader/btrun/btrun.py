@@ -31,16 +31,16 @@ import sys
 import backtrader as bt
 
 
-DATAFORMATS = dict(
-    btcsv=bt.feeds.BacktraderCSVData,
-    vchartcsv=bt.feeds.VChartCSVData,
-    vcfile=bt.feeds.VChartFile,
-    sierracsv=bt.feeds.SierraChartCSVData,
-    mt4csv=bt.feeds.MT4CSVData,
-    yahoocsv=bt.feeds.YahooFinanceCSVData,
-    yahoocsv_unreversed=bt.feeds.YahooFinanceCSVData,
-    yahoo=bt.feeds.YahooFinanceData,
-)
+DATAFORMATS = {
+    'btcsv': bt.feeds.BacktraderCSVData,
+    'vchartcsv': bt.feeds.VChartCSVData,
+    'vcfile': bt.feeds.VChartFile,
+    'sierracsv': bt.feeds.SierraChartCSVData,
+    'mt4csv': bt.feeds.MT4CSVData,
+    'yahoocsv': bt.feeds.YahooFinanceCSVData,
+    'yahoocsv_unreversed': bt.feeds.YahooFinanceCSVData,
+    'yahoo': bt.feeds.YahooFinanceData,
+}
 
 try:
     DATAFORMATS['vcdata'] = bt.feeds.VCData
@@ -58,15 +58,15 @@ except AttributeError:
     pass  # no oandapy available
 
 
-TIMEFRAMES = dict(
-    microseconds=bt.TimeFrame.MicroSeconds,
-    seconds=bt.TimeFrame.Seconds,
-    minutes=bt.TimeFrame.Minutes,
-    days=bt.TimeFrame.Days,
-    weeks=bt.TimeFrame.Weeks,
-    months=bt.TimeFrame.Months,
-    years=bt.TimeFrame.Years,
-)
+TIMEFRAMES = {
+    'microseconds': bt.TimeFrame.MicroSeconds,
+    'seconds': bt.TimeFrame.Seconds,
+    'minutes': bt.TimeFrame.Minutes,
+    'days': bt.TimeFrame.Days,
+    'weeks': bt.TimeFrame.Weeks,
+    'months': bt.TimeFrame.Months,
+    'years': bt.TimeFrame.Years,
+}
 
 
 def btrun(pargs=''):
@@ -157,7 +157,7 @@ def btrun(pargs=''):
                     analyzer.pprint()
 
     if args.plot:
-        pkwargs = dict(style='bar')
+        pkwargs = {'style': 'bar'}
         if args.plot is not True:
             # evaluates to True but is not "True" - args were passed
             ekwargs = eval('dict(' + args.plot + ')')
@@ -173,7 +173,7 @@ def setbroker(args, cerebro):
     if args.cash is not None:
         broker.setcash(args.cash)
 
-    commkwargs = dict()
+    commkwargs = {}
     if args.commission is not None:
         commkwargs['commission'] = args.commission
     if args.margin is not None:
@@ -205,7 +205,7 @@ def getdatas(args):
     dfcls = DATAFORMATS[args.format]
 
     # Prepare some args
-    dfkwargs = dict()
+    dfkwargs = {}
     if args.format == 'yahoo_unreversed':
         dfkwargs['reverse'] = True
 
@@ -232,7 +232,7 @@ def getdatas(args):
     if args.compression is not None:
         dfkwargs['compression'] = args.compression
 
-    datas = list()
+    datas = []
     for dname in args.data:
         dfkwargs['dataname'] = dname
         data = dfcls(**dfkwargs)
@@ -244,7 +244,7 @@ def getdatas(args):
 def getmodclasses(mod, clstype, clsname=None):
     clsmembers = inspect.getmembers(mod, inspect.isclass)
 
-    clslist = list()
+    clslist = []
     for name, cls in clsmembers:
         if not issubclass(cls, clstype):
             continue
@@ -263,7 +263,7 @@ def getmodfunctions(mod, funcname=None):
     members = inspect.getmembers(mod, inspect.isfunction) + \
         inspect.getmembers(mod, inspect.ismethod)
 
-    funclist = list()
+    funclist = []
     for name, member in members:
         if funcname:
             if name == funcname:
@@ -319,7 +319,7 @@ def loadmodule3(modpath, modname):
 
 
 def getobjects(iterable, clsbase, modbase, issignal=False):
-    retobjects = list()
+    retobjects = []
 
     for item in iterable or []:
         if issignal:
@@ -334,13 +334,13 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
         if len(tokens) == 1:
             modpath = tokens[0]
             name = ''
-            kwargs = dict()
+            kwargs = {}
         else:
             modpath, name = tokens
             kwtokens = name.split(':', 1)
             if len(kwtokens) == 1:
                 # no '(' found
-                kwargs = dict()
+                kwargs = {}
             else:
                 name = kwtokens[0]
                 kwtext = 'dict(' + kwtokens[1] + ')'
@@ -370,7 +370,7 @@ def getobjects(iterable, clsbase, modbase, issignal=False):
     return retobjects
 
 def getfunctions(iterable, modbase):
-    retfunctions = list()
+    retfunctions = []
 
     for item in iterable or []:
         tokens = item.split(':', 1)
@@ -378,13 +378,13 @@ def getfunctions(iterable, modbase):
         if len(tokens) == 1:
             modpath = tokens[0]
             name = ''
-            kwargs = dict()
+            kwargs = {}
         else:
             modpath, name = tokens
             kwtokens = name.split(':', 1)
             if len(kwtokens) == 1:
                 # no '(' found
-                kwargs = dict()
+                kwargs = {}
             else:
                 name = kwtokens[0]
                 kwtext = 'dict(' + kwtokens[1] + ')'

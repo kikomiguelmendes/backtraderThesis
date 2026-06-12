@@ -185,8 +185,7 @@ class Lines(object):
         lines = cls._getlines()
         if i >= len(lines):
             return ''
-        linealias = lines[i]
-        return linealias
+        return lines[i]
 
     @classmethod
     def getlinealiases(cls):
@@ -200,9 +199,9 @@ class Lines(object):
         Create the lines recording during "_derive" or else use the
         provided "initlines"
         '''
-        self.lines = list()
+        self.lines = []
         for line, linealias in enumerate(self._getlines()):
-            kwargs = dict()
+            kwargs = {}
             self.lines.append(LineBuffer(**kwargs))
 
         # Add the required extralines
@@ -331,7 +330,7 @@ class MetaLineSeries(LineMultiple.__class__):
 
         # Get the aliases - don't leave it there for subclasses
         aliases = dct.setdefault('alias', ())
-        aliased = dct.setdefault('aliased', '')
+        dct.setdefault('aliased', '')
 
         # Remove the line definition (if any) from the class creation
         linesoverride = dct.pop('linesoverride', False)
@@ -376,7 +375,7 @@ class MetaLineSeries(LineMultiple.__class__):
         # Before doing plotline newlines have been added and no plotlineinfo
         # is there add a default
         for line in newlines:
-            newplotlines.setdefault(line, dict())
+            newplotlines.setdefault(line, {})
 
         morebasesplotlines = \
             [x.plotlines for x in bases[1:] if hasattr(x, 'plotlines')]
@@ -393,7 +392,7 @@ class MetaLineSeries(LineMultiple.__class__):
                 # a tuple or list was passed, 1st is name, 2nd plotname
                 aliasplotname = alias[1]
                 alias = alias[0]
-                newdct['plotinfo'] = dict(plotname=aliasplotname)
+                newdct['plotinfo'] = {'plotname': aliasplotname}
 
             newcls = type(str(alias), (cls,), newdct)
             clsmodule = sys.modules[cls.__module__]
@@ -441,11 +440,11 @@ class MetaLineSeries(LineMultiple.__class__):
 
 
 class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
-    plotinfo = dict(
-        plot=True,
-        plotmaster=None,
-        legendloc=None,
-    )
+    plotinfo = {
+        'plot': True,
+        'plotmaster': None,
+        'legendloc': None,
+    }
 
     csv = True
 

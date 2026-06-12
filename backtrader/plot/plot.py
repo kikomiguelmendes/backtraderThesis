@@ -53,11 +53,11 @@ class PInfo(object):
         self.x = None
         self.xlen = 0
         self.sharex = None
-        self.figs = list()
-        self.cursors = list()
+        self.figs = []
+        self.cursors = []
         self.daxis = collections.OrderedDict()
-        self.vaxis = list()
-        self.zorder = dict()
+        self.vaxis = []
+        self.zorder = {}
         self.coloridx = collections.defaultdict(lambda: -1)
         self.handles = collections.defaultdict(list)
         self.labels = collections.defaultdict(list)
@@ -69,7 +69,7 @@ class PInfo(object):
         fig = mpyplot.figure(figid + numfig)
         self.figs.append(fig)
         self.daxis = collections.OrderedDict()
-        self.vaxis = list()
+        self.vaxis = []
         self.row = 0
         self.sharex = None
         return fig
@@ -103,12 +103,12 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
     def drawtag(self, ax, x, y, facecolor, edgecolor, alpha=0.9, **kwargs):
 
-        txt = ax.text(x, y, '%.2f' % y, va='center', ha='left',
+        ax.text(x, y, '%.2f' % y, va='center', ha='left',
                       fontsize=self.pinf.sch.subtxtsize,
-                      bbox=dict(boxstyle=tag_box_style,
-                                facecolor=facecolor,
-                                edgecolor=edgecolor,
-                                alpha=alpha),
+                      bbox={'boxstyle': tag_box_style,
+                                'facecolor': facecolor,
+                                'edgecolor': edgecolor,
+                                'alpha': alpha},
                       # 3.0 is the minimum default for text
                       zorder=self.pinf.zorder[ax] + 3.0,
                       **kwargs)
@@ -151,7 +151,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
         slen = len(st_dtime[start:end])
         d, m = divmod(slen, numfigs)
-        pranges = list()
+        pranges = []
         for i in range(numfigs):
             a = d * i + start
             if i == (numfigs - 1):
@@ -200,7 +200,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     self.pinf.xdata = xdata = []
                     xreal = self.pinf.xreal
                     dts = data.datetime.plot()
-                    xtemp = list()
+                    xtemp = []
                     for dt in (x for x in dts if dt0 <= x <= dt1):
                         dtidx = bisect.bisect_left(xreal, dt)
                         xdata.append(dtidx)
@@ -274,7 +274,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         clock = sorted(self.pinf.clock.datas,
                        key=lambda x: (x._timeframe, x._compression))[0]
 
-        comp = getattr(clock, '_compression', 1)
+        getattr(clock, '_compression', 1)
         tframe = getattr(clock, '_timeframe', TimeFrame.Days)
 
         if self.pinf.sch.fmt_x_data is None:
@@ -282,13 +282,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 fmtdata = '%Y'
             elif tframe == TimeFrame.Months:
                 fmtdata = '%Y-%m'
-            elif tframe == TimeFrame.Weeks or tframe == TimeFrame.Days:
+            elif tframe in (TimeFrame.Weeks, TimeFrame.Days):
                 fmtdata = '%Y-%m-%d'
             elif tframe == TimeFrame.Minutes:
                 fmtdata = '%Y-%m-%d %H:%M'
             elif tframe == TimeFrame.Seconds:
                 fmtdata = '%Y-%m-%d %H:%M:%S'
-            elif tframe == TimeFrame.MicroSeconds or tframe == TimeFrame.Ticks:
+            elif tframe in (TimeFrame.MicroSeconds, TimeFrame.Ticks):
                 fmtdata = '%Y-%m-%d %H:%M:%S.%f'
         else:
             fmtdata = self.pinf.sch.fmt_x_data
@@ -376,7 +376,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 subinds=None, upinds=None, downinds=None,
                 masterax=None):
 
-        sch = self.p.scheme
 
         # check subind
         subinds = subinds or []
@@ -442,7 +441,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 if plotlinevalue and not math.isnan(lplot[-1]):
                     label += ' %.2f' % lplot[-1]
 
-            plotkwargs = dict()
+            plotkwargs = {}
             linekwargs = lineplotinfo._getkwargs(skip_=True)
 
             if linekwargs.get('color', None) is None:
@@ -450,7 +449,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                     self.pinf.nextcolor(ax)
                 plotkwargs['color'] = self.pinf.color(ax)
 
-            plotkwargs.update(dict(aa=True, label=label))
+            plotkwargs.update({'aa': True, 'label': label})
             plotkwargs.update(**linekwargs)
 
             if ax in self.pinf.zorder:
@@ -498,7 +497,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                         l2 = getattr(ind, fref)
                         prl2 = l2.plotrange(self.pinf.xstart, self.pinf.xend)
                         y2 = np.array(prl2)
-                    kwargs = dict()
+                    kwargs = {}
                     if fop is not None:
                         kwargs['where'] = fop(y1, y2)
 
@@ -547,7 +546,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             if self.pinf.sch.legendind and \
                ind.plotinfo._get('plotlegend', True):
 
-                handles, labels = ax.get_legend_handles_labels()
+                _handles, labels = ax.get_legend_handles_labels()
                 # Ensure that we have something to show
                 if labels:
                     # location can come from the user
@@ -610,14 +609,14 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 ax.set_ylim(0, volylim, auto=True)
             else:
                 # plot a legend
-                handles, labels = ax.get_legend_handles_labels()
+                handles, _labels = ax.get_legend_handles_labels()
                 if handles:
 
                     # location can come from the user
                     loc = data.plotinfo.legendloc or self.pinf.sch.legendindloc
 
                     # Legend done here to ensure it includes all plots
-                    legend = ax.legend(loc=loc,
+                    ax.legend(loc=loc,
                                        numpoints=1, frameon=False,
                                        shadow=False, fancybox=False,
                                        prop=self.pinf.prop)
@@ -820,7 +819,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
     def sortdataindicators(self, strategy):
         # These lists/dictionaries hold the subplots that go above each data
-        self.dplotstop = list()
+        self.dplotstop = []
         self.dplotsup = collections.defaultdict(list)
         self.dplotsdown = collections.defaultdict(list)
         self.dplotsover = collections.defaultdict(list)
@@ -854,7 +853,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
 
             if getattr(x.plotinfo, 'plotforce', False):
                 if key not in strategy.datas:
-                    datas = strategy.datas
                     while True:
                         if key not in strategy.datas:
                             key = key._clock

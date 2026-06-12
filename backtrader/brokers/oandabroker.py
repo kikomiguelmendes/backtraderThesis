@@ -78,7 +78,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         self.notifs = collections.deque()  # holds orders which are notified
 
         self.opending = collections.defaultdict(list)  # pending transmission
-        self.brackets = dict()  # confirmed brackets
+        self.brackets = {}  # confirmed brackets
 
         self.startingcash = self.cash = 0.0
         self.startingvalue = self.value = 0.0
@@ -87,7 +87,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
     def start(self):
         super(OandaBroker, self).start()
         self.o.start(broker=self)
-        self.startingcash = self.cash = cash = self.o.get_cash()
+        self.startingcash = self.cash = self.o.get_cash()
         self.startingvalue = self.value = self.o.get_value()
 
         if self.p.use_positions:
@@ -251,7 +251,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         pos = self.getposition(data, clone=False)
         psize, pprice, opened, closed = pos.update(size, price)
 
-        comminfo = self.getcommissioninfo(data)
+        self.getcommissioninfo(data)
 
         closedvalue = closedcomm = 0.0
         openedvalue = openedcomm = 0.0
@@ -331,7 +331,7 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
         return self._transmit(order)
 
     def cancel(self, order):
-        o = self.orders[order.ref]
+        self.orders[order.ref]
         if order.status == Order.Cancelled:  # already cancelled
             return
 

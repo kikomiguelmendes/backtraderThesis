@@ -74,7 +74,7 @@ class LineBuffer(LineSingle):
     def __init__(self):
         self.lines = [self]
         self.mode = self.UnBounded
-        self.bindings = list()
+        self.bindings = []
         self.reset()
         self._tz = None
 
@@ -426,7 +426,7 @@ class LineBuffer(LineSingle):
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
         dtime = self.array[self.idx + ago]
-        tm, dt = math.modf(dtime)
+        _tm, dt = math.modf(dtime)
 
         return dtime < (dt + other)
 
@@ -438,7 +438,7 @@ class LineBuffer(LineSingle):
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
         dtime = self.array[self.idx + ago]
-        tm, dt = math.modf(dtime)
+        _tm, dt = math.modf(dtime)
 
         return dtime <= (dt + other)
 
@@ -450,7 +450,7 @@ class LineBuffer(LineSingle):
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
         dtime = self.array[self.idx + ago]
-        tm, dt = math.modf(dtime)
+        _tm, dt = math.modf(dtime)
 
         return dtime == (dt + other)
 
@@ -462,7 +462,7 @@ class LineBuffer(LineSingle):
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
         dtime = self.array[self.idx + ago]
-        tm, dt = math.modf(dtime)
+        _tm, dt = math.modf(dtime)
 
         return dtime > (dt + other)
 
@@ -474,7 +474,7 @@ class LineBuffer(LineSingle):
         # with the tm of the current datetime, the raw "tm" has to be
         # brought in sync with the current "day" count (integer part) to avoid
         dtime = self.array[self.idx + ago]
-        tm, dt = math.modf(dtime)
+        _tm, dt = math.modf(dtime)
 
         return dtime >= (dt + other)
 
@@ -505,12 +505,12 @@ class MetaLineActions(LineBuffer.__class__):
     postinit it registers the instance to the owner (remember that owner has
     been found in the base Metaclass for LineRoot)
     '''
-    _acache = dict()
+    _acache = {}
     _acacheuse = False
 
     @classmethod
     def cleancache(cls):
-        cls._acache = dict()
+        cls._acache = {}
 
     @classmethod
     def usecache(cls, onoff):

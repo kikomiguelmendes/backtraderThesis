@@ -53,7 +53,7 @@ class AwesomeOscillator(bt.Indicator):
         ('movav', MovAv.SMA),
     )
 
-    plotlines = dict(ao=dict(_method='bar', alpha=0.50, width=1.0))
+    plotlines = {'ao': {'_method': 'bar', 'alpha': 0.50, 'width': 1.0}}
 
     def __init__(self):
         median_price = (self.data.high + self.data.low) / 2.0

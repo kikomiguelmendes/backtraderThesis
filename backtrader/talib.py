@@ -64,7 +64,7 @@ else:
 
     class _MetaTALibIndicator(bt.Indicator.__class__):
         _refname = '_taindcol'
-        _taindcol = dict()
+        _taindcol = {}
 
         _KNOWN_UNSTABLE = ['SAR']
 
@@ -81,7 +81,7 @@ else:
             if _obj._unstable or cls.__name__ in cls._KNOWN_UNSTABLE:
                 _obj._lookback = 0
 
-            cerebro = bt.metabase.findowner(_obj, bt.Cerebro)
+            bt.metabase.findowner(_obj, bt.Cerebro)
             tafuncinfo = _obj._tabstract.info
             _obj._tafunc = getattr(talib, tafuncinfo['name'], None)
             return _obj, args, kwargs  # return the object and args
@@ -103,7 +103,7 @@ else:
             unstable = False
 
             # Prepare plotinfo
-            plotinfo = dict()
+            plotinfo = {}
             fflags = _tabstract.function_flags or []
             for fflag in fflags:
                 rfflag = R_TA_FUNC_FLAGS[fflag]
@@ -119,11 +119,11 @@ else:
             # Prepare plotlines
             lines = _tabstract.output_names
             output_flags = _tabstract.output_flags
-            plotlines = dict()
+            plotlines = {}
             samecolor = False
             for lname in lines:
                 oflags = output_flags.get(lname, None)
-                pline = dict()
+                pline = {}
                 for oflag in oflags or []:
                     orflag = R_TA_OUTPUT_FLAGS[oflag]
                     if orflag & OUT_FLAGS_LINE:
@@ -156,7 +156,7 @@ else:
                 # indicator is a candle. The values of a candle (100) will be
                 # used to plot a sign above the maximum of the bar which
                 # produces the candle
-                pline = dict()
+                pline = {}
                 pline['_name'] = name  # plotted name
                 lname = '_candleplot'  # change name
                 lines.append(lname)
@@ -232,4 +232,4 @@ else:
     for tafunc in tafunctions:
         _TALibIndicator._subclass(tafunc)
 
-    __all__ = tafunctions + ['MA_Type', '_TALibIndicator']
+    __all__ = [*tafunctions, 'MA_Type', '_TALibIndicator']

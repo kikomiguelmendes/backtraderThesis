@@ -88,4 +88,4 @@ class MetaMovAvBase(Indicator.__class__):
 
 class MovingAverageBase(with_metaclass(MetaMovAvBase, Indicator)):
     params = (('period', 30),)
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}

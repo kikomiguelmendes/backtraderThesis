@@ -42,12 +42,12 @@ class BollingerBands(Indicator):
     lines = ('mid', 'top', 'bot',)
     params = (('period', 20), ('devfactor', 2.0), ('movav', MovAv.Simple),)
 
-    plotinfo = dict(subplot=False)
-    plotlines = dict(
-        mid=dict(ls='--'),
-        top=dict(_samecolor=True),
-        bot=dict(_samecolor=True),
-    )
+    plotinfo = {'subplot': False}
+    plotlines = {
+        'mid': {'ls': '--'},
+        'top': {'_samecolor': True},
+        'bot': {'_samecolor': True},
+    }
 
     def _plotlabel(self):
         plabels = [self.p.period, self.p.devfactor]
@@ -69,7 +69,7 @@ class BollingerBandsPct(BollingerBands):
     Extends the Bollinger Bands with a Percentage line
     '''
     lines = ('pctb',)
-    plotlines = dict(pctb=dict(_name='%B'))  # display the line as %B on chart
+    plotlines = {'pctb': {'_name': '%B'}}  # display the line as %B on chart
 
     def __init__(self):
         super(BollingerBandsPct, self).__init__()

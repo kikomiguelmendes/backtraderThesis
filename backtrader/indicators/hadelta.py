@@ -56,12 +56,12 @@ class haDelta(bt.Indicator):
         ('autoheikin', True),
     )
 
-    plotinfo = dict(subplot=True)
+    plotinfo = {'subplot': True}
 
-    plotlines = dict(
-        haDelta=dict(color='red'),
-        smoothed=dict(color='grey', _fill_gt=(0, 'green'), _fill_lt=(0, 'red'))
-    )
+    plotlines = {
+        'haDelta': {'color': 'red'},
+        'smoothed': {'color': 'grey', '_fill_gt': (0, 'green'), '_fill_lt': (0, 'red')}
+    }
 
     def __init__(self):
         d = bt.ind.HeikinAshi(self.data) if self.p.autoheikin else self.data

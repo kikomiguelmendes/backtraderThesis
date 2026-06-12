@@ -63,7 +63,7 @@ class PivotPoint(Indicator):
       - https://en.wikipedia.org/wiki/Pivot_point_(technical_analysis)
     '''
     lines = ('p', 's1', 's2', 'r1', 'r2',)
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}
 
     params = (
         ('open', False),  # add opening price to the pivot point
@@ -145,7 +145,7 @@ class FibonacciPivotPoint(Indicator):
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
     '''
     lines = ('p', 's1', 's2', 's3', 'r1', 'r2', 'r3')
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}
     params = (
         ('open', False),  # add opening price to the pivot point
         ('close', False),  # use close twice in the calcs
@@ -232,7 +232,7 @@ class DemarkPivotPoint(Indicator):
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:pivot_points
     '''
     lines = ('p', 's1', 'r1',)
-    plotinfo = dict(subplot=False)
+    plotinfo = {'subplot': False}
     params = (
         ('open', False),  # add opening price to the pivot point
         ('close', False),  # use close twice in the calcs

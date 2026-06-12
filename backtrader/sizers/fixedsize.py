@@ -70,8 +70,7 @@ class FixedReverser(bt.Sizer):
 
     def _getsizing(self, comminfo, cash, data, isbuy):
         position = self.strategy.getposition(data)
-        size = self.p.stake * (1 + (position.size != 0))
-        return size
+        return self.p.stake * (1 + (position.size != 0))
 
 
 class FixedSizeTarget(bt.Sizer):

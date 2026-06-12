@@ -40,11 +40,10 @@ class _AroonBase(Indicator):
     _down = False
 
     params = (('period', 14), ('upperband', 70), ('lowerband', 30),)
-    plotinfo = dict(plotymargin=0.05, plotyhlines=[0, 100])
+    plotinfo = {'plotymargin': 0.05, 'plotyhlines': [0, 100]}
 
     def _plotlabel(self):
-        plabels = [self.p.period]
-        return plabels
+        return [self.p.period]
 
     def _plotinit(self):
         self.plotinfo.plotyhlines += [self.p.lowerband, self.p.upperband]

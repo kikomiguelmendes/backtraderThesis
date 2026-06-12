@@ -58,9 +58,8 @@ def tag_box_style(x0, y0, width, height, mutation_size, mutation_aspect=1):
            mplpath.Path.LINETO, mplpath.Path.LINETO,
            mplpath.Path.CLOSEPOLY]
 
-    path = mplpath.Path(cp, com)
+    return mplpath.Path(cp, com)
 
-    return path
 
 
 def shade_color(color, percent):

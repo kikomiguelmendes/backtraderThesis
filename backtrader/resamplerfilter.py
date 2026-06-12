@@ -411,8 +411,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
                         second=int(ps), microsecond=int(pus))
         if extradays:
             dt += timedelta(days=extradays)
-        dtnum = self.data.date2num(dt)
-        return dtnum
+        return self.data.date2num(dt)
 
     def _adjusttime(self, greater=False, forcedata=None):
         '''
@@ -535,7 +534,7 @@ class Resampler(_BaseResampler):
                 tframe = self.p.timeframe
                 if tframe == TimeFrame.Ticks:  # Ticks is already the lowest
                     dodeliver = True
-                elif tframe == TimeFrame.Minutes or tframe == TimeFrame.Days:
+                elif tframe in (TimeFrame.Minutes, TimeFrame.Days):
                     dtnum = self._calcadjtime(greater=True)
                     dodeliver = dtnum <= forcedata.datetime[0]
             else:

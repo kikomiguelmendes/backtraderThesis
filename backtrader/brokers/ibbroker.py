@@ -49,7 +49,7 @@ class IBOrderState(object):
             setattr(self, fname, getattr(orderstate, fname))
 
     def __str__(self):
-        txt = list()
+        txt = []
         txt.append('--- ORDERSTATE BEGIN')
         for f in self._fields:
             fname = 'm_' + f
@@ -134,7 +134,7 @@ class IBOrder(OrderBase, ib.ext.Order.Order):
         self.m_lmtPrice = 0.0
         self.m_auxPrice = 0.0
 
-        if self.exectype == self.Market or self.exectype == self.Close:  # is it really needed for Market?
+        if self.exectype in (self.Market, self.Close):  # is it really needed for Market?
             pass
         elif self.exectype == self.Limit:
             self.m_lmtPrice = self.price
@@ -262,8 +262,8 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
         self.startingvalue = self.value = 0.0
 
         self._lock_orders = threading.Lock()  # control access
-        self.orderbyid = dict()  # orders by order id
-        self.executions = dict()  # notified executions
+        self.orderbyid = {}  # orders by order id
+        self.executions = {}  # notified executions
         self.ordstatus = collections.defaultdict(dict)
         self.notifs = queue.Queue()  # holds orders which are notified
         self.tonotify = collections.deque()  # hold oids to be notified
@@ -298,7 +298,7 @@ class IBBroker(with_metaclass(MetaIBBroker, BrokerBase)):
 
     def cancel(self, order):
         try:
-            o = self.orderbyid[order.m_orderId]
+            self.orderbyid[order.m_orderId]
         except (ValueError, KeyError):
             return  # not found ... not cancellable
 

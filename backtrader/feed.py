@@ -39,7 +39,7 @@ from .tradingcal import PandasMarketCalendar
 
 
 class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
-    _indcol = dict()
+    _indcol = {}
 
     def __init__(cls, name, bases, dct):
         '''
@@ -106,8 +106,8 @@ class MetaAbstractDataBase(dataseries.OHLCDateTime.__class__):
         _obj._barstack = collections.deque()  # for filter operations
         _obj._barstash = collections.deque()  # for filter operations
 
-        _obj._filters = list()
-        _obj._ffilters = list()
+        _obj._filters = []
+        _obj._ffilters = []
         for fp in _obj.p.filters:
             if inspect.isclass(fp):
                 fp = fp(_obj)
@@ -282,7 +282,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         # The background thread could keep on adding notifications. The None
         # mark allows to identify which is the last notification to deliver
         self.notifs.append(None)  # put a mark
-        notifs = list()
+        notifs = []
         while True:
             notif = self.notifs.popleft()
             if notif is None:  # mark is reached
@@ -461,7 +461,6 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         return bool(ret)
 
     def _check(self, forcedata=None):
-        ret = 0
         for ff, fargs, fkwargs in self._filters:
             if not hasattr(ff, 'check'):
                 continue
@@ -600,10 +599,10 @@ class DataBase(AbstractDataBase):
 
 
 class FeedBase(with_metaclass(metabase.MetaParams, object)):
-    params = () + DataBase.params._gettuple()
+    params = (*DataBase.params._gettuple(),)
 
     def __init__(self):
-        self.datas = list()
+        self.datas = []
 
     def start(self):
         for data in self.datas:
@@ -720,12 +719,11 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
             return None
 
         line = line.rstrip('\n')
-        linetokens = line.split(self.separator)
-        return linetokens
+        return line.split(self.separator)
 
 
 class CSVFeedBase(FeedBase):
-    params = (('basepath', ''),) + CSVDataBase.params._gettuple()
+    params = (('basepath', ''), *CSVDataBase.params._gettuple())
 
     def _getdata(self, dataname, **kwargs):
         return self.DataCls(dataname=self.p.basepath + dataname,

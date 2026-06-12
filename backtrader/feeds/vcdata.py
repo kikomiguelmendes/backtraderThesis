@@ -543,7 +543,7 @@ class VCData(with_metaclass(MetaVCData, DataBase)):
 
         aticks = ArrayTicks[0]
         # self.debug_ticks(aticks)
-        ticks = dict()
+        ticks = {}
         for tick in aticks:
             ticks[tick.Field] = tick
 

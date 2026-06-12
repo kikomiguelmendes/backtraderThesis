@@ -60,8 +60,8 @@ class TimeReturn(Observer):
     _stclock = True
 
     lines = ('timereturn',)
-    plotinfo = dict(plot=True, subplot=True)
-    plotlines = dict(timereturn=dict(_name='Return'))
+    plotinfo = {'plot': True, 'subplot': True}
+    plotlines = {'timereturn': {'_name': 'Return'}}
 
     params = (
         ('timeframe', None),

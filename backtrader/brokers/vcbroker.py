@@ -142,7 +142,7 @@ class VCBroker(with_metaclass(MetaVCBroker, BrokerBase)):
 
         # Order storage
         self._lock_orders = threading.Lock()  # control access
-        self.orderbyid = dict()  # orders by order id
+        self.orderbyid = {}  # orders by order id
 
         # Notifications
         self.notifs = collections.deque()

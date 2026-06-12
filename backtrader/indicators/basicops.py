@@ -472,7 +472,7 @@ class WeightedAverage(PeriodN):
     '''
     alias = ('AverageWeighted',)
     lines = ('av',)
-    params = (('coef', 1.0), ('weights', tuple()),)
+    params = (('coef', 1.0), ('weights', ()),)
 
     def __init__(self):
         super(WeightedAverage, self).__init__()

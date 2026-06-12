@@ -187,7 +187,7 @@ class Trade(object):
         self.barlen = 0
 
         self.historyon = historyon
-        self.history = list()
+        self.history = []
 
         self.status = self.Created
 

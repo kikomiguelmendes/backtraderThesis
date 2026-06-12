@@ -296,20 +296,20 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._dolive = False
         self._doreplay = False
         self._dooptimize = False
-        self.stores = list()
-        self.feeds = list()
-        self.datas = list()
+        self.stores = []
+        self.feeds = []
+        self.datas = []
         self.datasbyname = collections.OrderedDict()
-        self.strats = list()
-        self.optcbs = list()  # holds a list of callbacks for opt strategies
-        self.observers = list()
-        self.analyzers = list()
-        self.indicators = list()
-        self.sizers = dict()
-        self.writers = list()
-        self.storecbs = list()
-        self.datacbs = list()
-        self.signals = list()
+        self.strats = []
+        self.optcbs = []  # holds a list of callbacks for opt strategies
+        self.observers = []
+        self.analyzers = []
+        self.indicators = []
+        self.sizers = {}
+        self.writers = []
+        self.storecbs = []
+        self.datacbs = []
+        self.signals = []
         self._signal_strat = (None, None, None)
         self._signal_concurrent = False
         self._signal_accumulate = False
@@ -321,8 +321,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         self._tradingcal = None  # TradingCalendar()
 
-        self._pretimers = list()
-        self._ohistory = list()
+        self._pretimers = []
+        self._ohistory = []
         self._fhistory = None
 
     @staticmethod
@@ -330,7 +330,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''Handy function which turns things into things that can be iterated upon
         including iterables
         '''
-        niterable = list()
+        niterable = []
         for elem in iterable:
             if isinstance(elem, string_types) or not isinstance(elem, collectionsAbc.Iterable):
                 elem = (elem,)
@@ -1073,7 +1073,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._dorunonce = False
             self._dopreload = False
 
-        self.runwriters = list()
+        self.runwriters = []
 
         # Add the system default writer if requested
         if self.p.writer is True:
@@ -1088,7 +1088,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         # Write down if any writer wants the full csv output
         self.writers_csv = any(map(lambda x: x.p.csv, self.runwriters))
 
-        self.runstrats = list()
+        self.runstrats = []
 
         if self.signals:  # allow processing of signals
             signalst, sargs, skwargs = self._signal_strat
@@ -1106,7 +1106,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
             if signalst is None:  # recheck
                 # Still None, create a default one
-                signalst, sargs, skwargs = SignalStrategy, tuple(), dict()
+                signalst, sargs, skwargs = SignalStrategy, (), {}
 
             # Add the signal strategy
             self.addstrategy(signalst,
@@ -1169,7 +1169,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''
         self._init_stcount()
 
-        self.runningstrats = runstrats = list()
+        self.runningstrats = runstrats = []
         for store in self.stores:
             store.start()
 
@@ -1190,7 +1190,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             feed.start()
 
         if self.writers_csv:
-            wheaders = list()
+            wheaders = []
             for data in self.datas:
                 if data.csv:
                     wheaders.extend(data.getwriterheaders())
@@ -1316,7 +1316,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         if self._dooptimize and self.p.optreturn:
             # Results can be optimized
-            results = list()
+            results = []
             for strat in runstrats:
                 for a in strat.analyzers:
                     a.strategy = None
@@ -1341,7 +1341,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         cerebroinfo['Datas'] = datainfos
 
-        stratinfos = dict()
+        stratinfos = {}
         for strat in runstrats:
             stname = strat.__class__.__name__
             stratinfos[stname] = strat.getwriterinfo()
@@ -1349,7 +1349,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         cerebroinfo['Strategies'] = stratinfos
 
         for writer in self.runwriters:
-            writer.writedict(dict(Cerebro=cerebroinfo))
+            writer.writedict({'Cerebro': cerebroinfo})
             writer.stop()
 
     def _brokernotify(self):
@@ -1472,7 +1472,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             return
 
         if self.writers_csv:
-            wvalues = list()
+            wvalues = []
             for data in self.datas:
                 if data.csv:
                     wvalues.extend(data.getwritervalues())
@@ -1501,8 +1501,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         data0 = datas[0]
         d0ret = True
 
-        rs = [i for i, x in enumerate(datas) if x.resampling]
-        rp = [i for i, x in enumerate(datas) if x.replaying]
+        [i for i, x in enumerate(datas) if x.resampling]
+        [i for i, x in enumerate(datas) if x.replaying]
         rsonly = [i for i, x in enumerate(datas)
                   if x.resampling and not x.replaying]
         onlyresample = len(datas) == len(rsonly)
@@ -1511,7 +1511,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
         clonecount = sum(d._clone for d in datas)
         ldatas = len(datas)
         ldatas_noclones = ldatas - clonecount
-        lastqcheck = False
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
             # if any has live data in the buffer, no data will wait anything
@@ -1668,7 +1667,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
             # Timemaster if needed be
             # dmaster = datas[dts.index(dt0)]  # and timemaster
-            slen = len(runstrats[0])
+            len(runstrats[0])
             for i, dti in enumerate(dts):
                 if dti <= dt0:
                     datas[i].advance()

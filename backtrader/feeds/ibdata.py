@@ -332,11 +332,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             pass
 
         # Make the initial contract
-        precon = self.ib.makecontract(
+        return self.ib.makecontract(
             symbol=symbol, sectype=sectype, exch=exch, curr=curr,
             expiry=expiry, strike=strike, right=right, mult=mult)
 
-        return precon
 
     def start(self):
         '''Starts the IB connecction and gets the real contract and
@@ -365,7 +364,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self._state = self._ST_START  # initial state for _load
         self._statelivereconn = False  # if reconnecting in live state
         self._subcription_valid = False  # subscription state
-        self._storedmsg = dict()  # keep pending live message (under None)
+        self._storedmsg = {}  # keep pending live message (under None)
 
         if not self.ib.connected():
             return
@@ -576,7 +575,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     self.put_notification(self.DISCONNECTED)
                     return False  # error management cancelled the queue
 
-                if msg == -354 or msg == -420:  # Data not subscribed
+                if msg in (-354, -420):  # Data not subscribed
                     self._subcription_valid = False
                     self.put_notification(self.NOTSUBSCRIBED)
                     return False

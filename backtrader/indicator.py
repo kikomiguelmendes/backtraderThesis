@@ -31,14 +31,14 @@ from .metabase import AutoInfoClass
 
 class MetaIndicator(IndicatorBase.__class__):
     _refname = '_indcol'
-    _indcol = dict()
+    _indcol = {}
 
-    _icache = dict()
+    _icache = {}
     _icacheuse = False
 
     @classmethod
     def cleancache(cls):
-        cls._icache = dict()
+        cls._icache = {}
 
     @classmethod
     def usecache(cls, onoff):
@@ -145,8 +145,8 @@ class MtLinePlotterIndicator(Indicator.__class__):
         cls.lines = lines._derive(name, (lname,), 0, [])
 
         plotlines = AutoInfoClass
-        newplotlines = dict()
-        newplotlines.setdefault(lname, dict())
+        newplotlines = {}
+        newplotlines.setdefault(lname, {})
         cls.plotlines = plotlines._derive(name, newplotlines, [], recurse=True)
 
         # Create the object and set the params in place

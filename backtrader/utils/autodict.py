@@ -32,7 +32,7 @@ def Tree():
 
 class AutoDictList(dict):
     def __missing__(self, key):
-        value = self[key] = list()
+        value = self[key] = []
         return value
 
 
@@ -49,7 +49,7 @@ class AutoDict(dict):
 
     def _close(self):
         self._closed = True
-        for key, val in self.items():
+        for val in self.values():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 
@@ -82,7 +82,7 @@ class AutoOrderedDict(OrderedDict):
 
     def _close(self):
         self._closed = True
-        for key, val in self.items():
+        for val in self.values():
             if isinstance(val, (AutoDict, AutoOrderedDict)):
                 val._close()
 

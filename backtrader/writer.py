@@ -107,8 +107,8 @@ class WriterFile(WriterBase):
 
     def __init__(self):
         self._len = itertools.count(1)
-        self.headers = list()
-        self.values = list()
+        self.headers = []
+        self.values = []
 
     def _start_output(self):
         # open file if needed
@@ -137,7 +137,7 @@ class WriterFile(WriterBase):
     def next(self):
         if self.p.csv:
             self.writeiterable(self.values, func=str, counter=next(self._len))
-            self.values = list()
+            self.values = []
 
     def addheaders(self, headers):
         if self.p.csv:

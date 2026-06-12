@@ -212,7 +212,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
         self._env = None  # reference to cerebro for general notifications
         self.broker = None  # broker instance
-        self.datas = list()  # datas that have registered over start
+        self.datas = []  # datas that have registered over start
         self.ccount = 0  # requests to start (from cerebro or datas)
 
         self._lock_tmoffset = threading.Lock()
@@ -221,12 +221,12 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         # Structures to hold datas requests
         self.qs = collections.OrderedDict()  # key: tickerId -> queues
         self.ts = collections.OrderedDict()  # key: queue -> tickerId
-        self.iscash = dict()  # tickerIds from cash products (for ex: EUR.JPY)
+        self.iscash = {}  # tickerIds from cash products (for ex: EUR.JPY)
 
-        self.histexreq = dict()  # holds segmented historical requests
-        self.histfmt = dict()  # holds datetimeformat for request
-        self.histsend = dict()  # holds sessionend (data time) for request
-        self.histtz = dict()  # holds sessionend (data time) for request
+        self.histexreq = {}  # holds segmented historical requests
+        self.histfmt = {}  # holds datetimeformat for request
+        self.histsend = {}  # holds sessionend (data time) for request
+        self.histtz = {}  # holds sessionend (data time) for request
 
         self.acc_cash = AutoDict()  # current total cash per account
         self.acc_value = AutoDict()  # current total value per account
@@ -241,7 +241,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
         self.cdetails = collections.defaultdict(list)  # hold cdetails requests
 
-        self.managed_accounts = list()  # received via managedAccounts
+        self.managed_accounts = []  # received via managedAccounts
 
         self.notifs = queue.Queue()  # store notifications for cerebro
 
@@ -399,7 +399,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     def startdatas(self):
         # kickstrat datas, not returning until all of them have been done
-        ts = list()
+        ts = []
         for data in self.datas:
             t = threading.Thread(target=data.reqdata)
             t.start()
@@ -411,7 +411,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     def stopdatas(self):
         # stop subs and force datas out of the loop (in LIFO order)
         qs = list(self.qs.values())
-        ts = list()
+        ts = []
         for data in self.datas:
             t = threading.Thread(target=data.canceldata)
             t.start()
@@ -428,7 +428,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         # The background thread could keep on adding notifications. The None
         # mark allows to identify which is the last notification to deliver
         self.notifs.put(None)  # put a mark
-        notifs = list()
+        notifs = []
         while True:
             notif = self.notifs.get()
             if notif is None:  # mark is reached
@@ -630,7 +630,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         return q in self.ts  # queue -> ticker
 
     def getContractDetails(self, contract, maxcount=None):
-        cds = list()
+        cds = []
         q = self.reqContractDetails(contract)
         while True:
             msg = q.get()
@@ -726,10 +726,10 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             duration = durations[-1]
 
             # Store the calculated data
-            self.histexreq[tickerId] = dict(
-                contract=contract, enddate=enddate, begindate=intdate,
-                timeframe=timeframe, compression=compression,
-                what=what, useRTH=useRTH, tz=tz, sessionend=sessionend)
+            self.histexreq[tickerId] = {
+                'contract': contract, 'enddate': enddate, 'begindate': intdate,
+                'timeframe': timeframe, 'compression': compression,
+                'what': what, 'useRTH': useRTH, 'tz': tz, 'sessionend': sessionend}
 
         barsize = self.tfcomp_to_size(timeframe, compression)
         self.histfmt[tickerId] = timeframe >= TimeFrame.Days
@@ -741,7 +741,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             if not what:
                 what = 'BID'  # default for cash unless otherwise specified
 
-        elif contract.m_secType in ['IND'] and self.p.indcash:
+        elif contract.m_secType == 'IND' and self.p.indcash:
             self.iscash[tickerId] = 4  # msg.field code
 
         what = what or 'TRADES'
@@ -982,132 +982,111 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     # Using a timedelta as a key allows to quickly find out which bar size
     # bar size (values in the tuples int the dict) can be used.
 
-    _durations = dict([
-        # 60 seconds - 1 min
-        ('60 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min')),
+    _durations = {'60 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min'),
 
         # 120 seconds - 2 mins
-        ('120 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min', '2 mins')),
+        '120 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min', '2 mins'),
 
         # 180 seconds - 3 mins
-        ('180 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min', '2 mins', '3 mins')),
+        '180 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min', '2 mins', '3 mins'),
 
         # 300 seconds - 5 mins
-        ('300 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min', '2 mins', '3 mins', '5 mins')),
+        '300 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min', '2 mins', '3 mins', '5 mins'),
 
         # 600 seconds - 10 mins
-        ('600 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min', '2 mins', '3 mins', '5 mins', '10 mins')),
+        '600 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min', '2 mins', '3 mins', '5 mins', '10 mins'),
 
         # 900 seconds - 15 mins
-        ('900 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
-          '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins')),
+        '900 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+          '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins'),
 
         # 1200 seconds - 20 mins
-        ('1200 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+        '1200 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
-          '20 mins')),
+          '20 mins'),
 
         # 1800 seconds - 30 mins
-        ('1800 S',
-         ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
+        '1800 S': ('1 secs', '5 secs', '10 secs', '15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
-          '20 mins', '30 mins')),
+          '20 mins', '30 mins'),
 
         # 3600 seconds - 1 hour
-        ('3600 S',
-         ('5 secs', '10 secs', '15 secs', '30 secs',
+        '3600 S': ('5 secs', '10 secs', '15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
-          '1 hour')),
+          '1 hour'),
 
         # 7200 seconds - 2 hours
-        ('7200 S',
-         ('5 secs', '10 secs', '15 secs', '30 secs',
+        '7200 S': ('5 secs', '10 secs', '15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
-          '1 hour', '2 hours')),
+          '1 hour', '2 hours'),
 
         # 10800 seconds - 3 hours
-        ('10800 S',
-         ('10 secs', '15 secs', '30 secs',
+        '10800 S': ('10 secs', '15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
-          '1 hour', '2 hours', '3 hours')),
+          '1 hour', '2 hours', '3 hours'),
 
         # 14400 seconds - 4 hours
-        ('14400 S',
-         ('15 secs', '30 secs',
+        '14400 S': ('15 secs', '30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
-          '1 hour', '2 hours', '3 hours', '4 hours')),
+          '1 hour', '2 hours', '3 hours', '4 hours'),
 
         # 28800 seconds - 8 hours
-        ('28800 S',
-         ('30 secs',
+        '28800 S': ('30 secs',
           '1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
-          '1 hour', '2 hours', '3 hours', '4 hours', '8 hours')),
+          '1 hour', '2 hours', '3 hours', '4 hours', '8 hours'),
 
         # 1 days
-        ('1 D',
-         ('1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
+        '1 D': ('1 min', '2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
           '1 hour', '2 hours', '3 hours', '4 hours', '8 hours',
-          '1 day')),
+          '1 day'),
 
         # 2 days
-        ('2 D',
-         ('2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
+        '2 D': ('2 mins', '3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
           '1 hour', '2 hours', '3 hours', '4 hours', '8 hours',
-          '1 day')),
+          '1 day'),
 
         # 1 weeks
-        ('1 W',
-         ('3 mins', '5 mins', '10 mins', '15 mins',
+        '1 W': ('3 mins', '5 mins', '10 mins', '15 mins',
           '20 mins', '30 mins',
           '1 hour', '2 hours', '3 hours', '4 hours', '8 hours',
-          '1 day', '1 W')),
+          '1 day', '1 W'),
 
         # 2 weeks
-        ('2 W',
-         ('15 mins', '20 mins', '30 mins',
+        '2 W': ('15 mins', '20 mins', '30 mins',
           '1 hour', '2 hours', '3 hours', '4 hours', '8 hours',
-          '1 day', '1 W')),
+          '1 day', '1 W'),
 
         # 1 months
-        ('1 M',
-         ('30 mins',
+        '1 M': ('30 mins',
           '1 hour', '2 hours', '3 hours', '4 hours', '8 hours',
-          '1 day', '1 W', '1 M')),
+          '1 day', '1 W', '1 M'),
 
         # 2+ months
-        ('2 M', ('1 day', '1 W', '1 M')),
-        ('3 M', ('1 day', '1 W', '1 M')),
-        ('4 M', ('1 day', '1 W', '1 M')),
-        ('5 M', ('1 day', '1 W', '1 M')),
-        ('6 M', ('1 day', '1 W', '1 M')),
-        ('7 M', ('1 day', '1 W', '1 M')),
-        ('8 M', ('1 day', '1 W', '1 M')),
-        ('9 M', ('1 day', '1 W', '1 M')),
-        ('10 M', ('1 day', '1 W', '1 M')),
-        ('11 M', ('1 day', '1 W', '1 M')),
+        '2 M': ('1 day', '1 W', '1 M'),
+        '3 M': ('1 day', '1 W', '1 M'),
+        '4 M': ('1 day', '1 W', '1 M'),
+        '5 M': ('1 day', '1 W', '1 M'),
+        '6 M': ('1 day', '1 W', '1 M'),
+        '7 M': ('1 day', '1 W', '1 M'),
+        '8 M': ('1 day', '1 W', '1 M'),
+        '9 M': ('1 day', '1 W', '1 M'),
+        '10 M': ('1 day', '1 W', '1 M'),
+        '11 M': ('1 day', '1 W', '1 M'),
 
         # 1+ years
-        ('1 Y',  ('1 day', '1 W', '1 M')),
-    ])
+        '1 Y': ('1 day', '1 W', '1 M'),}
 
     # Sizes allow for quick translation from bar sizes above to actual
     # timeframes to make a comparison with the actual data
@@ -1202,11 +1181,11 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             m = int(duration.split()[0])
             m1 = min(2, m)  # (2, 1) -> 1, (2, 7) -> 2. Bottomline: 1 or 2
             m2 = max(1, m1)  # m1 can only be 1 or 2
-            checkdur = '{} M'.format(m2)
+            '{} M'.format(m2)
         elif duration[-1] == 'Y':
-            checkdur = '1 Y'
+            pass
         else:
-            checkdur = duration
+            pass
 
         sizes = self._durations[checkduration]
         return duration, sizes

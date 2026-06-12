@@ -39,7 +39,7 @@ class MetaAnalyzer(bt.MetaParams):
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaAnalyzer, cls).donew(*args, **kwargs)
 
-        _obj._children = list()
+        _obj._children = []
 
         _obj.strategy = strategy = bt.metabase.findowner(_obj, bt.Strategy)
         _obj._parent = bt.metabase.findowner(_obj, Analyzer)
@@ -274,7 +274,7 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         '''
         writer = bt.WriterFile(*args, **kwargs)
         writer.start()
-        pdct = dict()
+        pdct = {}
         pdct[self.__class__.__name__] = self.get_analysis()
         writer.writedict(pdct)
         writer.stop()

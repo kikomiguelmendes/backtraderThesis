@@ -38,7 +38,7 @@ class Position(object):
     '''
 
     def __str__(self):
-        items = list()
+        items = []
         items.append('--- Position Begin')
         items.append('- Size: {}'.format(self.size))
         items.append('- Price: {}'.format(self.price))

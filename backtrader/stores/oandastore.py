@@ -39,25 +39,25 @@ from backtrader.utils.py3 import queue, with_metaclass
 
 class OandaRequestError(oandapy.OandaError):
     def __init__(self):
-        er = dict(code=599, message='Request Error', description='')
+        er = {'code': 599, 'message': 'Request Error', 'description': ''}
         super(self.__class__, self).__init__(er)
 
 
 class OandaStreamError(oandapy.OandaError):
     def __init__(self, content=''):
-        er = dict(code=598, message='Failed Streaming', description=content)
+        er = {'code': 598, 'message': 'Failed Streaming', 'description': content}
         super(self.__class__, self).__init__(er)
 
 
 class OandaTimeFrameError(oandapy.OandaError):
     def __init__(self, content):
-        er = dict(code=597, message='Not supported TimeFrame', description='')
+        er = {'code': 597, 'message': 'Not supported TimeFrame', 'description': ''}
         super(self.__class__, self).__init__(er)
 
 
 class OandaNetworkError(oandapy.OandaError):
     def __init__(self):
-        er = dict(code=596, message='Network Error', description='')
+        er = {'code': 596, 'message': 'Network Error', 'description': ''}
         super(self.__class__, self).__init__(er)
 
 
@@ -219,7 +219,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
         self._env = None  # reference to cerebro for general notifications
         self.broker = None  # broker instance
-        self.datas = list()  # datas that have registered over start
+        self.datas = []  # datas that have registered over start
 
         self._orders = collections.OrderedDict()  # map order.ref to oid
         self._ordersrev = collections.OrderedDict()  # map oid to order.ref
@@ -266,7 +266,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
     def get_notifications(self):
         '''Return the pending "store" notifications'''
         self.notifs.append(None)  # put a mark / threads could still append
-        return [x for x in iter(self.notifs.popleft, None)]
+        return list(iter(self.notifs.popleft, None))
 
     # Oanda supported granularities
     _GRANULARITIES = {
@@ -299,8 +299,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
         except (oandapy.OandaError, OandaRequestError,):
             return None
 
-        poslist = positions.get('positions', [])
-        return poslist
+        return positions.get('positions', [])
 
     def get_granularity(self, timeframe, compression):
         return self._GRANULARITIES.get((timeframe, compression), None)
@@ -462,7 +461,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             self._evt_acct.set()
 
     def order_create(self, order, stopside=None, takeside=None, **kwargs):
-        okwargs = dict()
+        okwargs = {}
         okwargs['instrument'] = order.data._dataname
         okwargs['units'] = abs(order.created.size)
         okwargs['side'] = 'buy' if order.isbuy() else 'sell'
@@ -514,7 +513,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
             # Ids are delivered in different fields and all must be fetched to
             # match them (as executions) to the order generated here
-            oids = list()
+            oids = []
             for oidfield in self._OIDSINGLE:
                 if oidfield in o and 'id' in o[oidfield]:
                     oids.append(o[oidfield]['id'])
@@ -559,7 +558,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             if oid is None:
                 continue  # the order is no longer there
             try:
-                o = self.oapi.close_order(self.p.account, oid)
+                self.oapi.close_order(self.p.account, oid)
             except Exception:
                 continue  # not cancelled - FIXME: notify
 
@@ -584,7 +583,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
         elif ttype in self._X_ORDER_CREATE:
             oid = trans['id']
-        elif ttype == 'ORDER_FILLED' or ttype == 'ORDER_CANCEL':
+        elif ttype in {'ORDER_FILLED', 'ORDER_CANCEL'}:
             oid = trans['orderId']
 
         elif ttype == 'TRADE_CLOSE':
@@ -615,7 +614,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
             return
 
         try:
-            oref = self._ordersrev[oid]
+            self._ordersrev[oid]
             self._process_transaction(oid, trans)
         except KeyError:  # not yet seen, keep as pending
             self._transpend[oid].append(trans)

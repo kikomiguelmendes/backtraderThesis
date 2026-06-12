@@ -65,12 +65,12 @@ class ParabolicSAR(PeriodN):
         ('afmax', 0.20),
     )
 
-    plotinfo = dict(subplot=False)
-    plotlines = dict(
-        psar=dict(
-            marker='.', markersize=4.0, color='black', fillstyle='full', ls=''
-        ),
-    )
+    plotinfo = {'subplot': False}
+    plotlines = {
+        'psar': {
+            'marker': '.', 'markersize': 4.0, 'color': 'black', 'fillstyle': 'full', 'ls': ''
+        },
+    }
 
     def prenext(self):
         if len(self) == 1:

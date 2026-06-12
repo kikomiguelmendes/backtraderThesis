@@ -63,7 +63,7 @@ class KnowSureThing(bt.Indicator):
         ('_smovav', SMA),
     )
 
-    plotinfo = dict(plothlines=[0.0])
+    plotinfo = {'plothlines': [0.0]}
 
     def __init__(self):
         rcma1 = self.p._rmovav(ROC100(period=self.p.rp1), period=self.p.rma1)

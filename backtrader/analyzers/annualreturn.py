@@ -55,7 +55,7 @@ class AnnualReturn(Analyzer):
         value_cur = 0.0
         value_end = 0.0
 
-        self.rets = list()
+        self.rets = []
         self.ret = OrderedDict()
 
         for i in range(len(self.data) - 1, -1, -1):
