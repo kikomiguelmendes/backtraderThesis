@@ -98,7 +98,7 @@ if __name__ == "__main__":
     strategy = results[0]
     print("Final Portfolio Value:   %.2f" % cerebro.broker.getvalue())
 
-    output_path = os.path.join(modpath, "baseline.json")
+    output_path = os.path.join(modpath, "modified_changes_1_2.json")
     with open(output_path, "w") as f:
         json.dump(strategy.portfolio_values, f)
     print(f"Portfolio values saved to {output_path}")
