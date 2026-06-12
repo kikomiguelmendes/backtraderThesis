@@ -12,3 +12,6 @@ select = [
     "RUF015", "RUF017", "RUF019", "RUF046", "RUF051", 
     "RUF057", "RUF059"
 ]
+
+# F401 will have 41 false positives in __init__.py files, so we ignore it there. 
+# And py3.py files also have 6 false positives, so we ignore it there as well.
