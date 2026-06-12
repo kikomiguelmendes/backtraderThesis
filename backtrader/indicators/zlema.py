@@ -22,7 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from . import Indicator, MovingAverageBase, MovAv
+from . import MovingAverageBase, MovAv
 
 
 class ZeroLagExponentialMovingAverage(MovingAverageBase):

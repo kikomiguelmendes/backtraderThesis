@@ -25,9 +25,8 @@ from __future__ import (absolute_import, division, print_function,
 from datetime import datetime, timedelta, tzinfo
 
 import backtrader as bt
-from backtrader import TimeFrame, date2num, num2date
+from backtrader import TimeFrame, date2num
 from backtrader.feed import DataBase
-from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import (integer_types, queue, string_types,
                                   with_metaclass)
 

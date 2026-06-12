@@ -105,14 +105,12 @@ class _LocalTimezone(datetime.tzinfo):
     def utcoffset(self, dt):
         if self._isdst(dt):
             return DSTOFFSET
-        else:
-            return STDOFFSET
+        return STDOFFSET
 
     def dst(self, dt):
         if self._isdst(dt):
             return DSTDIFF
-        else:
-            return ZERO
+        return ZERO
 
     def tzname(self, dt):
         return _time.tzname[self._isdst(dt)]

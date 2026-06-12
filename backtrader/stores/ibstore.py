@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import collections
 from copy import copy
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import inspect
 import itertools
 import random
@@ -310,7 +310,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             # datas to try to reconnect or else bail out
             return self.getTickerQueue(start=True)
 
-        elif broker is not None:
+        if broker is not None:
             self.broker = broker
 
     def stop(self):
@@ -1263,7 +1263,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             (d2, H2, M2, S2, US2) > (d1, H1, M1, S1, US1))
         if months <= 1:  # months <= 11
             return '1 M'  # return '{} M'.format(months)
-        elif months <= 11:
+        if months <= 11:
             return '2 M'  # cap at 2 months to keep the table clean
 
         # Next: years
@@ -1423,10 +1423,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if self.connected():
                     self._event_managed_accounts.wait()
 
-                if not self.managed_accounts:
-                    return self.acc_upds.copy()
-
-                elif len(self.managed_accounts) > 1:
+                if not self.managed_accounts or len(self.managed_accounts) > 1:
                     return self.acc_upds.copy()
 
                 # Only 1 account, fall through to return only 1
@@ -1463,7 +1460,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if not self.managed_accounts:
                     return float()
 
-                elif len(self.managed_accounts) > 1:
+                if len(self.managed_accounts) > 1:
                     return sum(self.acc_value.values())
 
                 # Only 1 account, fall through to return only 1
@@ -1500,7 +1497,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if not self.managed_accounts:
                     return float()
 
-                elif len(self.managed_accounts) > 1:
+                if len(self.managed_accounts) > 1:
                     return sum(self.acc_cash.values())
 
                 # Only 1 account, fall through to return only 1

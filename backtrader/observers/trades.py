@@ -26,7 +26,6 @@ import uuid
 from .. import Observer
 from ..utils.py3 import with_metaclass
 
-from ..trade import Trade
 
 
 class Trades(Observer):

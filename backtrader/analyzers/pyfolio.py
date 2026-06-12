@@ -22,10 +22,9 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-import collections
 
 import backtrader as bt
-from backtrader.utils.py3 import items, iteritems
+from backtrader.utils.py3 import iteritems
 
 from . import TimeReturn, PositionsValue, Transactions, GrossLeverage
 

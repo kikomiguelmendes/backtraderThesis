@@ -28,7 +28,6 @@ from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
 from backtrader.utils.py3 import (integer_types, queue, string_types,
                                   with_metaclass)
-from backtrader.metabase import MetaParams
 from backtrader.stores import ibstore
 
 
@@ -489,20 +488,20 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     self.put_notification(self.NOTSUBSCRIBED)
                     return False
 
-                elif msg == -1100:  # conn broken
+                if msg == -1100:  # conn broken
                     # Tell to wait for a message to do a backfill
                     # self._state = self._ST_DISCONN
                     self._subcription_valid = False
                     self._statelivereconn = self.p.backfill
                     continue
 
-                elif msg == -1102:  # conn broken/restored tickerId maintained
+                if msg == -1102:  # conn broken/restored tickerId maintained
                     # The message may be duplicated
                     if not self._statelivereconn:
                         self._statelivereconn = self.p.backfill
                     continue
 
-                elif msg == -1101:  # conn broken/restored tickerId gone
+                if msg == -1101:  # conn broken/restored tickerId gone
                     # The message may be duplicated
                     self._subcription_valid = False
                     if not self._statelivereconn:
@@ -510,14 +509,14 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                         self.reqdata()  # resubscribe
                     continue
 
-                elif msg == -10225:  # Bust event occurred, current subscription is deactivated.
+                if msg == -10225:  # Bust event occurred, current subscription is deactivated.
                     self._subcription_valid = False
                     if not self._statelivereconn:
                         self._statelivereconn = self.p.backfill
                         self.reqdata()  # resubscribe
                     continue
 
-                elif isinstance(msg, integer_types):
+                if isinstance(msg, integer_types):
                     # Unexpected notification for historical data skip it
                     # May be a "not connected not yet processed"
                     self.put_notification(self.UNKNOWN, msg)
@@ -569,7 +568,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 self._statelivereconn = False  # no longer in live
                 continue
 
-            elif self._state == self._ST_HISTORBACK:
+            if self._state == self._ST_HISTORBACK:
                 msg = self.qhist.get()
                 if msg is None:  # Conn broken during historical/backfilling
                     # Situation not managed. Simply bail out
@@ -577,17 +576,12 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     self.put_notification(self.DISCONNECTED)
                     return False  # error management cancelled the queue
 
-                elif msg == -354:  # Data not subscribed
+                if msg == -354 or msg == -420:  # Data not subscribed
                     self._subcription_valid = False
                     self.put_notification(self.NOTSUBSCRIBED)
                     return False
 
-                elif msg == -420:  # No permissions for the data
-                    self._subcription_valid = False
-                    self.put_notification(self.NOTSUBSCRIBED)
-                    return False
-
-                elif isinstance(msg, integer_types):
+                if isinstance(msg, integer_types):
                     # Unexpected notification for historical data skip it
                     # May be a "not connected not yet processed"
                     self.put_notification(self.UNKNOWN, msg)
@@ -609,7 +603,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 self._state = self._ST_LIVE
                 continue
 
-            elif self._state == self._ST_FROM:
+            if self._state == self._ST_FROM:
                 if not self.p.backfill_from.next():
                     # additional data source is consumed
                     self._state = self._ST_START
@@ -624,7 +618,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
                 return True
 
-            elif self._state == self._ST_START:
+            if self._state == self._ST_START:
                 if not self._st_start():
                     return False
 

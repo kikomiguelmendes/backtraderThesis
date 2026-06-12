@@ -24,10 +24,8 @@ from __future__ import (absolute_import, division, print_function,
 from datetime import datetime, timedelta
 
 from backtrader.feed import DataBase
-from backtrader import TimeFrame, date2num, num2date
-from backtrader.utils.py3 import (integer_types, queue, string_types,
-                                  with_metaclass)
-from backtrader.metabase import MetaParams
+from backtrader import date2num, num2date
+from backtrader.utils.py3 import (queue, with_metaclass)
 from backtrader.stores import oandastore
 
 
@@ -345,7 +343,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                 self._statelivereconn = False  # no longer in live
                 continue
 
-            elif self._state == self._ST_HISTORBACK:
+            if self._state == self._ST_HISTORBACK:
                 msg = self.qhist.get()
                 if msg is None:  # Conn broken during historical/backfilling
                     # Situation not managed. Simply bail out
@@ -353,7 +351,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                     self._state = self._ST_OVER
                     return False  # error management cancelled the queue
 
-                elif 'code' in msg:  # Error
+                if 'code' in msg:  # Error
                     self.put_notification(self.NOTSUBSCRIBED)
                     self.put_notification(self.DISCONNECTED)
                     self._state = self._ST_OVER
@@ -364,18 +362,17 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                         return True  # loading worked
 
                     continue  # not loaded ... date may have been seen
-                else:
-                    # End of histdata
-                    if self.p.historical:  # only historical
-                        self.put_notification(self.DISCONNECTED)
-                        self._state = self._ST_OVER
-                        return False  # end of historical
+                # End of histdata
+                if self.p.historical:  # only historical
+                    self.put_notification(self.DISCONNECTED)
+                    self._state = self._ST_OVER
+                    return False  # end of historical
 
                 # Live is also wished - go for it
                 self._state = self._ST_LIVE
                 continue
 
-            elif self._state == self._ST_FROM:
+            if self._state == self._ST_FROM:
                 if not self.p.backfill_from.next():
                     # additional data source is consumed
                     self._state = self._ST_START
@@ -390,7 +387,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
 
                 return True
 
-            elif self._state == self._ST_START:
+            if self._state == self._ST_START:
                 if not self._st_start(instart=False):
                     self._state = self._ST_OVER
                     return False

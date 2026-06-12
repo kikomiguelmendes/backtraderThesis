@@ -40,7 +40,6 @@ import math
 from .utils.py3 import range, with_metaclass, string_types
 
 from .lineroot import LineRoot, LineSingle, LineMultiple
-from . import metabase
 from .utils import num2date, time2num
 
 

@@ -24,7 +24,6 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 import datetime
 import inspect
-import itertools
 import random
 import string
 import sys
@@ -74,7 +73,7 @@ def btrun(pargs=''):
     args = parse_args(pargs)
 
     if args.flush:
-        import backtrader.utils.flushfile
+        pass
 
     stdstats = not args.nostdstats
 

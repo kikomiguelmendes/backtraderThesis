@@ -25,11 +25,10 @@ def compare_outputs(baseline_path, modified_path):
         print(f"PASS: outputs are identical across {len(baseline)} bars")
         print(f"Final portfolio value: {baseline[-1]:.2f}")
         return True
-    else:
-        mape = sum(abs(b - m) / abs(b) for b, m in zip(baseline, modified) if b != 0) / len(baseline) * 100
-        print(f"FAIL: {mismatches} bars differ")
-        print(f"MAPE: {mape:.6f}%")
-        return False
+    mape = sum(abs(b - m) / abs(b) for b, m in zip(baseline, modified) if b != 0) / len(baseline) * 100
+    print(f"FAIL: {mismatches} bars differ")
+    print(f"MAPE: {mape:.6f}%")
+    return False
 
 
 if __name__ == "__main__":

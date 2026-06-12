@@ -25,7 +25,6 @@ from __future__ import (absolute_import, division, print_function,
 import bisect
 import collections
 from datetime import date, datetime, timedelta
-from itertools import islice
 
 from .feed import AbstractDataBase
 from .metabase import MetaParams

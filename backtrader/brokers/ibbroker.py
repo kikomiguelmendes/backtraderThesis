@@ -22,24 +22,17 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import collections
-from copy import copy
 from datetime import date, datetime, timedelta
 import threading
 import uuid
 
 import ib.ext.Order
-import ib.opt as ibopt
 
-from backtrader.feed import DataBase
-from backtrader import (TimeFrame, num2date, date2num, BrokerBase,
-                        Order, OrderBase, OrderData)
-from backtrader.utils.py3 import bytes, bstr, with_metaclass, queue, MAXFLOAT
-from backtrader.metabase import MetaParams
+from backtrader import (num2date, date2num, BrokerBase,
+                        Order, OrderBase)
+from backtrader.utils.py3 import bytes, bstr, with_metaclass, queue
 from backtrader.comminfo import CommInfoBase
-from backtrader.position import Position
 from backtrader.stores import ibstore
-from backtrader.utils import AutoDict, AutoOrderedDict
-from backtrader.comminfo import CommInfoBase
 
 bytes = bstr  # py2/3 need for ibpy
 
@@ -141,9 +134,7 @@ class IBOrder(OrderBase, ib.ext.Order.Order):
         self.m_lmtPrice = 0.0
         self.m_auxPrice = 0.0
 
-        if self.exectype == self.Market:  # is it really needed for Market?
-            pass
-        elif self.exectype == self.Close:  # is it ireally needed for Close?
+        if self.exectype == self.Market or self.exectype == self.Close:  # is it really needed for Market?
             pass
         elif self.exectype == self.Limit:
             self.m_lmtPrice = self.price

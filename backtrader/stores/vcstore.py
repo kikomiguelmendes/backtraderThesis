@@ -23,19 +23,15 @@ from __future__ import (absolute_import, division, print_function,
 
 
 import collections
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, timedelta
 import os.path
 import threading
-import time as _timemod
 
 import ctypes
 
-from backtrader import TimeFrame, Position
-from backtrader.feed import DataBase
+from backtrader import TimeFrame
 from backtrader.metabase import MetaParams
-from backtrader.utils.py3 import (MAXINT, range, queue, string_types,
-                                  with_metaclass)
-from backtrader.utils import AutoDict
+from backtrader.utils.py3 import (queue, with_metaclass)
 
 
 class _SymInfo(object):
@@ -129,10 +125,9 @@ def PumpEvents(timeout=-1, hevt=None, cb=None):
 
                 continue
 
-            else:
-                ctypes.windll.kernel32.CloseHandle(hevt)
-                ctypes.windll.kernel32.SetConsoleCtrlHandler(HandlerRoutine, 0)
-                raise  # something else happened
+            ctypes.windll.kernel32.CloseHandle(hevt)
+            ctypes.windll.kernel32.SetConsoleCtrlHandler(HandlerRoutine, 0)
+            raise  # something else happened
         else:
             ctypes.windll.kernel32.CloseHandle(hevt)
             ctypes.windll.kernel32.SetConsoleCtrlHandler(HandlerRoutine, 0)
@@ -253,13 +248,13 @@ class VCStore(with_metaclass(MetaSingleton, object)):
         for rkey in (_winreg.HKEY_CURRENT_USER, _winreg.HKEY_LOCAL_MACHINE,):
             try:
                 vckey = _winreg.OpenKey(rkey, self.VC_KEYNAME)
-            except WindowsError as e:
+            except WindowsError:
                 continue
 
             # Try to get the key value
             try:
                 vcdir, _ = _winreg.QueryValueEx(vckey, self.VC_KEYVAL)
-            except WindowsError as e:
+            except WindowsError:
                 continue
             else:
                 break  # found vcdir

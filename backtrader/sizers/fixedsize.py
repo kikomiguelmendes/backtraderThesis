@@ -43,8 +43,7 @@ class FixedSize(bt.Sizer):
     def _getsizing(self, comminfo, cash, data, isbuy):
         if self.p.tranches > 1:
             return abs(int(self.p.stake / self.p.tranches))
-        else:
-            return self.p.stake
+        return self.p.stake
 
     def setsizing(self, stake):
         if self.p.tranches > 1:
@@ -96,8 +95,7 @@ class FixedSizeTarget(bt.Sizer):
         if self.p.tranches > 1:
             size = abs(int(self.p.stake / self.p.tranches))
             return min((self.strategy.position.size + size), self.p.stake)
-        else:
-            return self.p.stake
+        return self.p.stake
 
     def setsizing(self, stake):
         if self.p.tranches > 1:

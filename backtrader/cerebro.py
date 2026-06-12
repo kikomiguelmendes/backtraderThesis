@@ -43,8 +43,7 @@ from . import observers
 from .writer import WriterFile
 from .utils import OrderedDict, tzparse, num2date, date2num
 from .strategy import Strategy, SignalStrategy
-from .tradingcal import (TradingCalendarBase, TradingCalendar,
-                         PandasMarketCalendar)
+from .tradingcal import (TradingCalendarBase, PandasMarketCalendar)
 from .timer import Timer
 
 # Defined here to make it pickable. Ideally it could be defined inside Cerebro
@@ -333,9 +332,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''
         niterable = list()
         for elem in iterable:
-            if isinstance(elem, string_types):
-                elem = (elem,)
-            elif not isinstance(elem, collectionsAbc.Iterable):  # Different functions will be called for different Python versions
+            if isinstance(elem, string_types) or not isinstance(elem, collectionsAbc.Iterable):
                 elem = (elem,)
 
             niterable.append(elem)
@@ -575,9 +572,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         If a subclass of `TradingCalendarBase` is passed (not an instance) it
         will be instantiated
         '''
-        if isinstance(cal, string_types):
-            cal = PandasMarketCalendar(calendar=cal)
-        elif hasattr(cal, 'valid_days'):
+        if isinstance(cal, string_types) or hasattr(cal, 'valid_days'):
             cal = PandasMarketCalendar(calendar=cal)
 
         else:

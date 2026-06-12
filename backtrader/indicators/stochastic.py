@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from . import Indicator, Max, MovAv, Highest, Lowest, DivByZero
+from . import Indicator, MovAv, Highest, Lowest, DivByZero
 
 
 class _StochasticBase(Indicator):

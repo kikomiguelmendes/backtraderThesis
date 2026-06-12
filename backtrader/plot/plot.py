@@ -24,23 +24,20 @@ from __future__ import (absolute_import, division, print_function,
 import bisect
 import collections
 import datetime
-import itertools
 import math
 import operator
 import sys
 
 import matplotlib
 import numpy as np  # guaranteed by matplotlib
-import matplotlib.dates as mdates
 import matplotlib.font_manager as mfontmgr
-import matplotlib.legend as mlegend
 import matplotlib.ticker as mticker
 
-from ..utils.py3 import range, with_metaclass, string_types, integer_types
+from ..utils.py3 import range, with_metaclass, integer_types
 from .. import AutoInfoClass, MetaParams, TimeFrame, date2num
 
 from .finance import plot_candlestick, plot_ohlc, plot_volume, plot_lineonclose
-from .formatters import (MyVolFormatter, MyDateFormatter, getlocator)
+from .formatters import (MyVolFormatter, MyDateFormatter)
 from . import locator as loc
 from .multicursor import MultiCursor
 from .scheme import PlotScheme
@@ -285,17 +282,13 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
                 fmtdata = '%Y'
             elif tframe == TimeFrame.Months:
                 fmtdata = '%Y-%m'
-            elif tframe == TimeFrame.Weeks:
-                fmtdata = '%Y-%m-%d'
-            elif tframe == TimeFrame.Days:
+            elif tframe == TimeFrame.Weeks or tframe == TimeFrame.Days:
                 fmtdata = '%Y-%m-%d'
             elif tframe == TimeFrame.Minutes:
                 fmtdata = '%Y-%m-%d %H:%M'
             elif tframe == TimeFrame.Seconds:
                 fmtdata = '%Y-%m-%d %H:%M:%S'
-            elif tframe == TimeFrame.MicroSeconds:
-                fmtdata = '%Y-%m-%d %H:%M:%S.%f'
-            elif tframe == TimeFrame.Ticks:
+            elif tframe == TimeFrame.MicroSeconds or tframe == TimeFrame.Ticks:
                 fmtdata = '%Y-%m-%d %H:%M:%S.%f'
         else:
             fmtdata = self.pinf.sch.fmt_x_data

@@ -78,10 +78,7 @@ else:
             _obj._tabstract.set_function_args(**_obj.p._getkwargs())
             _obj._lookback = lookback = _obj._tabstract.lookback + 1
             _obj.updateminperiod(lookback)
-            if _obj._unstable:
-                _obj._lookback = 0
-
-            elif cls.__name__ in cls._KNOWN_UNSTABLE:
+            if _obj._unstable or cls.__name__ in cls._KNOWN_UNSTABLE:
                 _obj._lookback = 0
 
             cerebro = bt.metabase.findowner(_obj, bt.Cerebro)

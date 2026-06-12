@@ -38,5 +38,5 @@ except ImportError:
 
 try:
     from .oandabroker import OandaBroker
-except ImportError as e:
+except ImportError:
     pass  # The user may not have something installed

@@ -21,7 +21,6 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import datetime
 
 from .utils.py3 import with_metaclass
 from .metabase import MetaParams
@@ -179,7 +178,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
         if not self.p.automargin:
             return self.p.margin
 
-        elif self.p.automargin < 0:
+        if self.p.automargin < 0:
             return price * self.p.mult
 
         return price * self.p.automargin  # int/float expected

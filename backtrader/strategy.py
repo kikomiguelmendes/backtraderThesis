@@ -24,12 +24,10 @@ from __future__ import (absolute_import, division, print_function,
 import collections
 import copy
 import datetime
-import inspect
 import itertools
 import operator
 
-from .utils.py3 import (filter, keys, integer_types, iteritems, itervalues,
-                        map, MAXINT, string_types, with_metaclass)
+from .utils.py3 import (filter, keys, integer_types, iteritems, map, MAXINT, string_types, with_metaclass)
 
 import backtrader as bt
 from .lineiterator import LineIterator, StrategyBase
@@ -37,7 +35,7 @@ from .lineroot import LineSingle
 from .lineseries import LineSeriesStub
 from .metabase import ItemCollection, findowner
 from .trade import Trade
-from .utils import OrderedDict, AutoOrderedDict, AutoDictList
+from .utils import AutoOrderedDict, AutoDictList
 
 
 class MetaStrategy(StrategyBase.__class__):
@@ -993,7 +991,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
         if possize > 0:
             return self.sell(data=data, size=size, **kwargs)
-        elif possize < 0:
+        if possize < 0:
             return self.buy(data=data, size=size, **kwargs)
 
         return None
@@ -1272,10 +1270,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if not target and possize:
             return self.close(data=data, size=possize, **kwargs)
 
-        elif target > possize:
+        if target > possize:
             return self.buy(data=data, size=target - possize, **kwargs)
 
-        elif target < possize:
+        if target < possize:
             return self.sell(data=data, size=possize - target, **kwargs)
 
         return None  # no execution target == possize
@@ -1310,20 +1308,19 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if not target and possize:  # closing a position
             return self.close(data=data, size=possize, price=price, **kwargs)
 
-        else:
-            value = self.broker.getvalue(datas=[data])
-            comminfo = self.broker.getcommissioninfo(data)
+        value = self.broker.getvalue(datas=[data])
+        comminfo = self.broker.getcommissioninfo(data)
 
-            # Make sure a price is there
-            price = price if price is not None else data.close[0]
+        # Make sure a price is there
+        price = price if price is not None else data.close[0]
 
-            if target > value:
-                size = comminfo.getsize(price, target - value)
-                return self.buy(data=data, size=size, price=price, **kwargs)
+        if target > value:
+            size = comminfo.getsize(price, target - value)
+            return self.buy(data=data, size=size, price=price, **kwargs)
 
-            elif target < value:
-                size = comminfo.getsize(price, value - target)
-                return self.sell(data=data, size=size, price=price, **kwargs)
+        if target < value:
+            size = comminfo.getsize(price, value - target)
+            return self.sell(data=data, size=size, price=price, **kwargs)
 
         return None  # no execution size == possize
 

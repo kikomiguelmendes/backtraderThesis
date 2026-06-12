@@ -33,11 +33,7 @@ from matplotlib.dates import AutoDateLocator as ADLocator
 from matplotlib.dates import RRuleLocator as RRLocator
 from matplotlib.dates import AutoDateFormatter as ADFormatter
 
-from matplotlib.dates import (HOURS_PER_DAY, MIN_PER_HOUR, SEC_PER_MIN,
-                              MONTHS_PER_YEAR, DAYS_PER_WEEK,
-                              SEC_PER_HOUR, SEC_PER_DAY,
-                              num2date, rrulewrapper, YearLocator,
-                              MicrosecondLocator)
+from matplotlib.dates import (HOURS_PER_DAY, MIN_PER_HOUR, MONTHS_PER_YEAR, num2date, rrulewrapper, MicrosecondLocator)
 
 from dateutil.relativedelta import relativedelta
 import numpy as np
@@ -203,8 +199,7 @@ class AutoDateLocator(ADLocator):
                 raise ValueError(
                     'No sensible date limit could be found in the '
                     'AutoDateLocator.')
-            else:
-                usemicro = True
+            usemicro = True
 
         if not usemicro and use_rrule_locator[i]:
             _, bymonth, bymonthday, byhour, byminute, bysecond, _ = byranges
@@ -227,7 +222,7 @@ class AutoDateLocator(ADLocator):
             # try for matplotlib < 3.6.0
             locator.set_view_interval(*self.axis.get_view_interval())
             locator.set_data_interval(*self.axis.get_data_interval())
-        except Exception as e:
+        except Exception:
             try:
                 # try for matplotlib >= 3.6.0
                 self.axis.set_view_interval(*self.axis.get_view_interval())

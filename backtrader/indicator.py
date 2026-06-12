@@ -25,7 +25,7 @@ from __future__ import (absolute_import, division, print_function,
 from .utils.py3 import range, with_metaclass
 
 from .lineiterator import LineIterator, IndicatorBase
-from .lineseries import LineSeriesMaker, Lines
+from .lineseries import Lines
 from .metabase import AutoInfoClass
 
 

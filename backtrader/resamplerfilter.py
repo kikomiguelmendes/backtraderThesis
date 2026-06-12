@@ -22,7 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 from .dataseries import TimeFrame, _Bar
 from .utils.py3 import with_metaclass
@@ -163,19 +163,19 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             # Ticks is already the lowest level
             return self.bar.isopen()
 
-        elif tframe < TimeFrame.Days:
+        if tframe < TimeFrame.Days:
             return self._barover_subdays(data)
 
-        elif tframe == TimeFrame.Days:
+        if tframe == TimeFrame.Days:
             return self._barover_days(data)
 
-        elif tframe == TimeFrame.Weeks:
+        if tframe == TimeFrame.Weeks:
             return self._barover_weeks(data)
 
-        elif tframe == TimeFrame.Months:
+        if tframe == TimeFrame.Months:
             return self._barover_months(data)
 
-        elif tframe == TimeFrame.Years:
+        if tframe == TimeFrame.Years:
             return self._barover_years(data)
 
     def _eosset(self):
@@ -223,8 +223,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             bar_yearweek = baryear * 100 + barweek
 
             return bar_yearweek > yearweek
-        else:
-            return data._calendar.last_weekday(data.datetime.date())
+        return data._calendar.last_weekday(data.datetime.date())
 
     def _barover_months(self, data):
         dt = data.num2date(self.bar.datetime).date()
@@ -536,10 +535,7 @@ class Resampler(_BaseResampler):
                 tframe = self.p.timeframe
                 if tframe == TimeFrame.Ticks:  # Ticks is already the lowest
                     dodeliver = True
-                elif tframe == TimeFrame.Minutes:
-                    dtnum = self._calcadjtime(greater=True)
-                    dodeliver = dtnum <= forcedata.datetime[0]
-                elif tframe == TimeFrame.Days:
+                elif tframe == TimeFrame.Minutes or tframe == TimeFrame.Days:
                     dtnum = self._calcadjtime(greater=True)
                     dodeliver = dtnum <= forcedata.datetime[0]
             else:

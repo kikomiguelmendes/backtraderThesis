@@ -22,20 +22,13 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import collections
-from copy import copy
-from datetime import date, datetime, timedelta
-import threading
 
-from backtrader.feed import DataBase
-from backtrader import (TimeFrame, num2date, date2num, BrokerBase,
-                        Order, BuyOrder, SellOrder, OrderBase, OrderData)
-from backtrader.utils.py3 import bytes, with_metaclass, MAXFLOAT
-from backtrader.metabase import MetaParams
+from backtrader import (BrokerBase,
+                        Order, BuyOrder, SellOrder)
+from backtrader.utils.py3 import with_metaclass
 from backtrader.comminfo import CommInfoBase
 from backtrader.position import Position
 from backtrader.stores import oandastore
-from backtrader.utils import AutoDict, AutoOrderedDict
-from backtrader.comminfo import CommInfoBase
 
 
 class OandaCommInfo(CommInfoBase):
@@ -295,9 +288,9 @@ class OandaBroker(with_metaclass(MetaOandaBroker, BrokerBase)):
                 self.o.order_create(parent, stopside, takeside)
                 return takeside  # parent was already returned
 
-            else:  # Parent order, which is not being transmitted
-                self.orders[order.ref] = order
-                return self.o.order_create(order)
+            # Parent order, which is not being transmitted
+            self.orders[order.ref] = order
+            return self.o.order_create(order)
 
         # Not transmitting
         self.opending[pref].append(order)

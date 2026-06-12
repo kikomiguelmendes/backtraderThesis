@@ -424,9 +424,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                 # can't deliver new bar, too early, go back
                 self.rewind()
                 return False
-            else:
-                if ticks:
-                    self._tick_fill()
+            if ticks:
+                self._tick_fill()
 
         else:
             if ticks:

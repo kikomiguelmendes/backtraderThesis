@@ -25,7 +25,6 @@ import collections
 import datetime
 
 import backtrader as bt
-from backtrader.comminfo import CommInfoBase
 from backtrader.order import Order, BuyOrder, SellOrder
 from backtrader.position import Position
 from backtrader.utils.py3 import string_types, integer_types
@@ -1006,7 +1005,7 @@ class BackBroker(bt.BrokerBase):
 
         if pslip <= pmax:  # slipping can return price
             return pslip
-        elif self.p.slip_match or (lim and self.p.slip_limit):
+        if self.p.slip_match or (lim and self.p.slip_limit):
             if not self.p.slip_out:
                 return pmax
 
@@ -1029,7 +1028,7 @@ class BackBroker(bt.BrokerBase):
 
         if pslip >= pmin:  # slipping can return price
             return pslip
-        elif self.p.slip_match or (lim and self.p.slip_limit):
+        if self.p.slip_match or (lim and self.p.slip_limit):
             if not self.p.slip_out:
                 return pmin
 

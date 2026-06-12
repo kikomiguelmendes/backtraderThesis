@@ -33,7 +33,6 @@ import requests  # oandapy depdendency
 import backtrader as bt
 from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import queue, with_metaclass
-from backtrader.utils import AutoDict
 
 
 # Extend the exceptions to support extra cases
@@ -82,7 +81,7 @@ class API(oandapy.API):
         # Added the try block
         try:
             response = func(url, **request_args)
-        except requests.RequestException as e:
+        except requests.RequestException:
             return OandaRequestError().error_response
 
         content = response.content.decode('utf-8')
@@ -126,7 +125,7 @@ class Streamer(oandapy.Streamer):
             # Added exception control here
             try:
                 response = self.client.get(url, **request_args)
-            except requests.RequestException as e:
+            except requests.RequestException:
                 self.q.put(OandaRequestError().error_response)
                 break
 
@@ -561,7 +560,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
                 continue  # the order is no longer there
             try:
                 o = self.oapi.close_order(self.p.account, oid)
-            except Exception as e:
+            except Exception:
                 continue  # not cancelled - FIXME: notify
 
             self.broker._cancel(oref)
@@ -585,10 +584,7 @@ class OandaStore(with_metaclass(MetaSingleton, object)):
 
         elif ttype in self._X_ORDER_CREATE:
             oid = trans['id']
-        elif ttype == 'ORDER_FILLED':
-            oid = trans['orderId']
-
-        elif ttype == 'ORDER_CANCEL':
+        elif ttype == 'ORDER_FILLED' or ttype == 'ORDER_CANCEL':
             oid = trans['orderId']
 
         elif ttype == 'TRADE_CLOSE':

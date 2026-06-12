@@ -171,7 +171,7 @@ class PandasData(feed.DataBase):
 
         # try to autodetect if all columns are numeric
         cstrings = filter(lambda x: isinstance(x, string_types), colnames)
-        colsnumeric = not len(list(cstrings))
+        colsnumeric = not list(cstrings)
 
         # Where each datafield find its value
         self._colmapping = dict()

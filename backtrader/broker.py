@@ -26,7 +26,6 @@ from backtrader.metabase import MetaParams
 from backtrader.utils.py3 import with_metaclass
 
 from . import fillers as fillers
-from . import fillers as filler
 
 
 class MetaBroker(MetaParams):

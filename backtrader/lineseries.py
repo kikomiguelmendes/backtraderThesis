@@ -35,10 +35,9 @@ import sys
 
 from .utils.py3 import map, range, string_types, with_metaclass
 
-from .linebuffer import LineBuffer, LineActions, LinesOperation, LineDelay, NAN
-from .lineroot import LineRoot, LineSingle, LineMultiple
+from .linebuffer import LineBuffer, LineActions, LineDelay, NAN
+from .lineroot import LineRoot, LineMultiple
 from .metabase import AutoInfoClass
-from . import metabase
 
 
 class LineAlias(object):
