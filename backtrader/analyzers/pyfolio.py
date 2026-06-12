@@ -135,15 +135,12 @@ class PyFolio(bt.Analyzer):
         #
         # Transactions
         txss = self.rets['transactions']
-        txs = []
         # The transactions have a common key (date) and can potentially happend
         # for several assets. The dictionary has a single key and a list of
         # lists. Each sublist contains the fields of a transaction
         # Hence the double loop to undo the list indirection
-        for k, v in iteritems(txss):
-            for v2 in v:
-                txs.append([k, *v2])
-
+        txs = [[k, *v2] for k, v in iteritems(txss) for v2 in v]
+        
         cols = txs.pop(0)  # headers are in the first entry
         transactions = DF.from_records(txs, index=cols[0], columns=cols)
         transactions.index = pandas.to_datetime(transactions.index)

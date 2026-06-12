@@ -70,8 +70,7 @@ class DataSeries(LineSeries):
     def getwriterheaders(self):
         headers = [self._name, 'len']
 
-        for lo in self.LineOrder:
-            headers.append(self._getlinealias(lo))
+        headers = [self._getlinealias(lo) for lo in self.LineOrder]
 
         morelines = self.getlinealiases()[len(self.LineOrder):]
         headers.extend(morelines)

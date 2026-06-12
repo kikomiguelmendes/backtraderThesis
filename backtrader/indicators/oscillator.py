@@ -114,10 +114,7 @@ for movav in MovingAverage._movavs[1:]:
     linename = movav.lines._getlinealias(0)
     newclsname = movname + 'Oscillator'
 
-    newaliases = [movname + 'Osc']
-    for alias in getattr(movav, 'alias', []):
-        for suffix in ['Oscillator', 'Osc']:
-            newaliases.append(alias + suffix)
+    newaliases = [alias + suffix for alias in getattr(movav, 'alias', []) for suffix in ['Oscillator', 'Osc']]
 
     newclsdoc = _newclsdoc % movname
     newclsdct = {'__doc__': newclsdoc,

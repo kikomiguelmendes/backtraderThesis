@@ -110,10 +110,7 @@ for movav in MovingAverage._movavs[1:]:
     linename = movav.lines._getlinealias(0)
     newclsname = movname + 'Envelope'
 
-    newaliases = []
-    for alias in getattr(movav, 'alias', []):
-        for suffix in ['Envelope']:
-            newaliases.append(alias + suffix)
+    newaliases = [alias + suffix for alias in getattr(movav, 'alias', []) for suffix in ['Envelope']]
 
     newclsdoc = _newclsdoc % (movname, linename, movname, linename, linename)
 
