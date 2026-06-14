@@ -33,6 +33,8 @@ def mean(values):
 
 
 def std(values):
+    if len(values) < 2:
+        return 0.0
     m = mean(values)
     variance = sum((x - m) ** 2 for x in values) / (len(values) - 1)
     return math.sqrt(variance)
