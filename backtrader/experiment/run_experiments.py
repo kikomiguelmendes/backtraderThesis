@@ -19,7 +19,7 @@ DEFAULT_BRANCHES = ["baseline", "changes_1", "changes_2", "changes_3", "changes_
 DEFAULT_BENCHMARK = os.path.join(EXPERIMENT_DIR, "maxStressRun.py")
 RESULTS_BASE = os.path.join(EXPERIMENT_DIR, "results")
 
-COOLDOWN_S = 60
+COOLDOWN_S = 1
 
 def git(args, **kwargs):
     return subprocess.run(["git"] + args, cwd=REPO_ROOT, check=True, **kwargs)
