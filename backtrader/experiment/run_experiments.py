@@ -81,12 +81,24 @@ def save_run_order(run_list, seed, results_base):
 def run_single(branch, benchmark, out_dir):
     git(["checkout", branch])
     env = {**os.environ, "BT_OUTPUT_DIR": out_dir}
-    subprocess.run(
-        [sys.executable, benchmark],
-        env=env,
-        cwd=REPO_ROOT,
-        check=True,
-    )
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            subprocess.run(
+                [sys.executable, benchmark],
+                env=env,
+                cwd=REPO_ROOT,
+                check=True,
+            )
+            return
+        except subprocess.CalledProcessError as e:
+            if attempt < max_retries - 1:
+                print(f"  Run failed with {e}, retrying in 30s... (attempt {attempt + 1}/{max_retries})")
+                time.sleep(30)
+            else:
+                print(f"  Run failed after {max_retries} attempts, skipping.")
+                raise
 
 def analyze_branch(branch, benchmark, results_base):
     out_dir = os.path.join(results_base, branch)
