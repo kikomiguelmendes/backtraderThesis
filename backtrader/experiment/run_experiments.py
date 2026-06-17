@@ -119,40 +119,67 @@ def analyze_branch(branch, benchmark, results_base):
     subprocess.run(cmd, check=True)
 
 def compare_results(branches, results_base):
-    rows = []
+    rows = {}
     for branch in branches:
         summary_path = os.path.join(results_base, branch, "energy_summary.csv")
         if not os.path.exists(summary_path):
             print(f"  WARNING: no summary found for branch '{branch}' at {summary_path}")
             continue
 
-        summary = {}
+        summary = {"branch": branch}
         with open(summary_path, newline="") as f:
             reader = csv.reader(f)
             for row in reader:
-                if row and row[0] == "mean":
-                    summary["mean_duration_s"] = row[1]
-                    summary["mean_cpu_energy_J"] = row[2]
-                    summary["mean_total_energy_J"] = row[3]
-                elif row and row[0] == "std":
-                    summary["std_cpu_energy_J"] = row[2]
-                    summary["std_total_energy_J"] = row[3]
-                elif row and row[0] == "pct_reduction":
-                    summary["pct_reduction_cpu"] = row[1]
-                    summary["pct_reduction_total"] = row[2]
-                elif row and row[0] == "mann_whitney_p":
-                    summary["p_cpu"] = row[1]
-                    summary["p_total"] = row[2]
-                elif row and row[0] == "h2_rejected":
+                if not row:
+                    continue
+                key = row[0]
+                if key == "mean":
+                    summary["mean_duration_s"] = float(row[1])
+                    summary["mean_cpu_energy_J"] = float(row[2])
+                    summary["mean_total_energy_J"] = float(row[3])
+                elif key == "std":
+                    summary["std_cpu_energy_J"] = float(row[2])
+                    summary["std_total_energy_J"] = float(row[3])
+                elif key == "pct_reduction":
+                    summary["pct_reduction_cpu"] = float(row[1])
+                    summary["pct_reduction_total"] = float(row[2])
+                elif key == "mann_whitney_p":
+                    summary["p_cpu"] = float(row[1])
+                    summary["p_total"] = float(row[2])
+                elif key == "h2_rejected":
                     summary["h2_rejected_cpu"] = row[1]
                     summary["h2_rejected_total"] = row[2]
-
-        summary["branch"] = branch
-        rows.append(summary)
+        rows[branch] = summary
 
     if not rows:
         print("No results to compare.")
         return
+
+    b1 = rows.get("changes_1", {}).get("pct_reduction_cpu", 0)
+    b2 = rows.get("changes_2", {}).get("pct_reduction_cpu", 0)
+    b3 = rows.get("changes_3", {}).get("pct_reduction_cpu", 0)
+
+    combinations = {
+        "changes_1_2":   b1 + b2,
+        "changes_1_3":   b1 + b3,
+        "changes_2_3":   b2 + b3,
+        "changes_1_2_3": b1 + b2 + b3,
+    }
+
+    for branch, expected in combinations.items():
+        if branch in rows:
+            observed = rows[branch].get("pct_reduction_cpu", 0)
+            diff = observed - expected
+            if abs(diff) < 0.5:
+                effect = "additive"
+            elif diff > 0:
+                effect = "superadditive"
+            else:
+                effect = "subadditive"
+            rows[branch]["h3_expected_pct"] = round(expected, 4)
+            rows[branch]["h3_observed_pct"] = round(observed, 4)
+            rows[branch]["h3_difference_pct"] = round(diff, 4)
+            rows[branch]["h3_effect"] = effect
 
     comparison_path = os.path.join(results_base, "comparison.csv")
     fieldnames = [
@@ -168,27 +195,18 @@ def compare_results(branches, results_base):
         "p_total",
         "h2_rejected_cpu",
         "h2_rejected_total",
+        "h3_expected_pct",
+        "h3_observed_pct",
+        "h3_difference_pct",
+        "h3_effect",
     ]
     with open(comparison_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(rows.values())
 
-    print(f"\n{'=' * 70}")
-    print(f"  Cross-branch comparison written to {comparison_path}")
-    print(f"{'=' * 70}\n")
-
-    print(f"  {'Branch':<20} {'Mean CPU (J)':>14} {'Std (J)':>10} {'Reduction':>10} {'p-value':>10} {'H2_0':>10}")
-    print("  " + "-" * 78)
-    for row in rows:
-        branch = row["branch"]
-        mean_j = row.get("mean_cpu_energy_J", "n/a")
-        std_j = row.get("std_cpu_energy_J", "n/a")
-        pct = row.get("pct_reduction_cpu", "n/a")
-        p = row.get("p_cpu", "n/a")
-        rejected = row.get("h2_rejected_cpu", "n/a")
-        print(f"  {branch:<20} {mean_j:>14} {std_j:>10} {pct:>10} {p:>10} {rejected:>10}")
-
+    print(f"Comparison written to {comparison_path}")
+    
 def main():
     parser = argparse.ArgumentParser(
         description="Run benchmarks across all architecture branches."
