@@ -31,3 +31,8 @@ run,duration_s,cpu_energy_J,energy_consumed_J
 30,12.109869,336.75156,735.48864
 mean,12.098915,333.448692,712.849416
 std,-,3.53484873,23.49703588
+
+metric,cpu_energy,total_energy
+pct_reduction,0.0,0.0
+mann_whitney_p,0.50295,0.50295
+h2_rejected,False,False
