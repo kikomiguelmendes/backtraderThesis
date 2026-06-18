@@ -11,9 +11,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 import backtrader as bt
 
-N_RUNS = 3
+N_RUNS = 30
 COOLDOWN_S = 60
-#FROM_DATE = datetime.datetime(2014, 12, 30)
 FROM_DATE = datetime.datetime(1999, 1, 1)
 TO_DATE = datetime.datetime(2014, 12, 31)
 
@@ -54,7 +53,6 @@ class MaxStressStrategy(bt.Strategy):
 
     def next(self):
         score = sum(s[0] - e[0] for s, e in zip(self.smas, self.emas))
-        rsi_mean = sum(r[0] for r in self.rsiz) / len(self.rsiz)
         cross_sum = sum(c[0] for c in self.crosses)
 
         self.close()
@@ -107,7 +105,7 @@ if __name__ == "__main__":
         print(f"{'='*50}")
 
         tracker.start_task("backtesting_setup")
-        cerebro = bt.Cerebro()
+        cerebro = bt.Cerebro(cheat_on_open=True)
 
         for _ in range(10):
             cerebro.addstorecb(_noop_store_cb)
@@ -117,7 +115,6 @@ if __name__ == "__main__":
 
         cerebro.broker.setcash(1_000_000.0)
         cerebro.broker.setcommission(commission=0.001)
-        cerebro.broker.set_coo(True)
         task_results.append(("backtesting_setup", tracker.stop_task()))
 
         tracker.start_task("data_ingestion")
