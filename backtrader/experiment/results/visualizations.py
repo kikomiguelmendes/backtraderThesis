@@ -10,8 +10,9 @@ matplotlib.rcParams["font.sans-serif"] = ["Helvetica Neue", "Helvetica", "Arial"
 RESULTS_DIR = Path(__file__).resolve().parent
 CSV_PATH = RESULTS_DIR / "comparison.csv"
 
-BRAND = "#00338D"
-GREY  = "#AAAAAA"
+BRAND  = "#37474F"  # dark blue-grey charcoal
+GREY   = "#AAAAAA"
+ORANGE = "#D95F02"  # warm orange accent (expected marker)
 BAR_H = 0.52
 
 df = pd.read_csv(CSV_PATH)
@@ -70,14 +71,10 @@ for i, (branch, row) in enumerate(ind.iterrows()):
     # sig annotation: for large bars anchor right after bar; for small bars
     # anchor at a fixed column so it never collides with the value label
     sig_x  = val + 0.5 if inside else 3.2
-    sig_color = "#888888" if is_ns else "#2A6A2A"
+    sig_color = "#888888" if is_ns else "#37474F"
     ax1.text(sig_x, i, sig, va="center", ha="left", fontsize=8.5,
              color=sig_color, style="italic" if is_ns else "normal")
 
-ax1.set_title(
-    "Energy Reduction by Technique\n(% reduction in total energy vs baseline)",
-    fontsize=13, fontweight="bold", color=BRAND, pad=12, loc="left",
-)
 ax1.set_xlabel("Energy Reduction (%)", fontsize=10, color="#555555", labelpad=8)
 ax1.set_xlim(0, 22)
 ax1.tick_params(axis="y", length=0, labelsize=11, colors="#1A1A1A")
@@ -108,7 +105,7 @@ comb_labels = {
 }
 
 EFFECT_COLORS = {
-    "additive":      "#2A6A2A",
+    "additive":      "#37474F",
     "subadditive":   "#B85C00",
     "superadditive": "#6A2A6A",
 }
@@ -140,8 +137,8 @@ ax2.barh(
 for i, (_, row) in enumerate(comb.iterrows()):
     exp = row["h3_expected_pct"]
     ax2.plot([exp, exp], [i - BAR_H / 2, i + BAR_H / 2],
-             color="#E8523A", linewidth=2.2, zorder=3, solid_capstyle="round")
-    ax2.scatter([exp], [i], marker="D", s=52, color="#E8523A",
+             color=ORANGE, linewidth=2.2, zorder=3, solid_capstyle="round")
+    ax2.scatter([exp], [i], marker="D", s=52, color=ORANGE,
                 zorder=4, linewidths=0)
 
 # Value labels + effect annotations
@@ -166,10 +163,6 @@ for i, (_, row) in enumerate(comb.iterrows()):
 ax2.set_yticks(list(yticks))
 ax2.set_yticklabels(comb["label"].values, fontsize=10.5)
 
-ax2.set_title(
-    "Do Techniques Compound?",
-    fontsize=13, fontweight="bold", color=BRAND, pad=12, loc="left",
-)
 ax2.set_xlabel("Energy Reduction (%)", fontsize=10, color="#555555", labelpad=8)
 ax2.set_xlim(-1.5, 22)
 ax2.tick_params(axis="y", length=0, colors="#1A1A1A")
@@ -182,7 +175,7 @@ ax2.xaxis.grid(False)
 ax2.yaxis.grid(False)
 
 obs_patch = mpatches.Patch(color=BRAND, label="Observed reduction")
-exp_line  = plt.Line2D([0], [0], color="#E8523A", linewidth=2,
+exp_line  = plt.Line2D([0], [0], color=ORANGE, linewidth=2,
                         marker="D", markersize=6, label="Expected (additive)")
 ax2.legend(handles=[obs_patch, exp_line], frameon=False,
            fontsize=9, loc="center right")
