@@ -155,9 +155,9 @@ def compare_results(branches, results_base):
         print("No results to compare.")
         return
 
-    b1 = rows.get("changes_1", {}).get("pct_reduction_cpu", 0)
-    b2 = rows.get("changes_2", {}).get("pct_reduction_cpu", 0)
-    b3 = rows.get("changes_3", {}).get("pct_reduction_cpu", 0)
+    b1 = rows.get("changes_1", {}).get("pct_reduction_total", 0)
+    b2 = rows.get("changes_2", {}).get("pct_reduction_total", 0)
+    b3 = rows.get("changes_3", {}).get("pct_reduction_total", 0)
 
     combinations = {
         "changes_1_2":   b1 + b2,
@@ -168,7 +168,7 @@ def compare_results(branches, results_base):
 
     for branch, expected in combinations.items():
         if branch in rows:
-            observed = rows[branch].get("pct_reduction_cpu", 0)
+            observed = rows[branch].get("pct_reduction_total", 0)
             diff = observed - expected
             if abs(diff) < 0.5:
                 effect = "additive"

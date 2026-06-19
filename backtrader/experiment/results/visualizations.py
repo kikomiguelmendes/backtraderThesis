@@ -107,11 +107,22 @@ comb_labels = {
     "changes_1_2_3": "All Three Combined",
 }
 
-comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct"]].copy()
+EFFECT_COLORS = {
+    "additive":      "#2A6A2A",
+    "subadditive":   "#B85C00",
+    "superadditive": "#6A2A6A",
+}
+EFFECT_LABELS = {
+    "additive":      "additive",
+    "subadditive":   "sub-additive",
+    "superadditive": "super-additive",
+}
+
+comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct", "h3_effect"]].copy()
 comb["label"] = [comb_labels[b] for b in comb.index]
 comb = comb.sort_values("pct_reduction_total", ascending=True)
 
-fig2, ax2 = plt.subplots(figsize=(9, 4.2))
+fig2, ax2 = plt.subplots(figsize=(10, 4.2))
 
 yticks = range(len(comb))
 
@@ -133,16 +144,24 @@ for i, (_, row) in enumerate(comb.iterrows()):
     ax2.scatter([exp], [i], marker="D", s=52, color="#E8523A",
                 zorder=4, linewidths=0)
 
-# Value labels
+# Value labels + effect annotations
 for i, (_, row) in enumerate(comb.iterrows()):
-    obs = row["pct_reduction_total"]
-    exp = row["h3_expected_pct"]
+    obs    = row["pct_reduction_total"]
+    effect = row["h3_effect"]
+
     inside = obs > 5
-    val_x  = obs - 0.2 if inside else obs + 0.25
-    val_ha = "right"   if inside else "left"
-    val_c  = "white"   if inside else "#1A1A1A"
-    ax2.text(val_x, i, f"{obs:.1f}%", va="center", ha=val_ha,
-             fontsize=10, fontweight="semibold", color=val_c)
+    if inside:
+        ax2.text(obs - 0.2, i, f"{obs:.1f}%", va="center", ha="right",
+                 fontsize=10, fontweight="semibold", color="white")
+    else:
+        # small bar: label to the LEFT so it never hits the expected marker
+        ax2.text(-0.2, i, f"{obs:.1f}%", va="center", ha="right",
+                 fontsize=10, fontweight="semibold", color="#1A1A1A")
+
+    # effect annotation at a fixed right column
+    ax2.text(21.8, i, EFFECT_LABELS[effect], va="center", ha="right",
+             fontsize=8.5, color=EFFECT_COLORS[effect],
+             style="italic")
 
 ax2.set_yticks(list(yticks))
 ax2.set_yticklabels(comb["label"].values, fontsize=10.5)
@@ -152,7 +171,7 @@ ax2.set_title(
     fontsize=13, fontweight="bold", color=BRAND, pad=12, loc="left",
 )
 ax2.set_xlabel("Energy Reduction (%)", fontsize=10, color="#555555", labelpad=8)
-ax2.set_xlim(0, 22)
+ax2.set_xlim(-1.5, 22)
 ax2.tick_params(axis="y", length=0, colors="#1A1A1A")
 ax2.tick_params(axis="x", length=3, labelsize=9, colors="#888888")
 ax2.spines["top"].set_visible(False)
@@ -166,7 +185,7 @@ obs_patch = mpatches.Patch(color=BRAND, label="Observed reduction")
 exp_line  = plt.Line2D([0], [0], color="#E8523A", linewidth=2,
                         marker="D", markersize=6, label="Expected (additive)")
 ax2.legend(handles=[obs_patch, exp_line], frameon=False,
-           fontsize=9, loc="lower right")
+           fontsize=9, loc="center right")
 
 fig2.tight_layout(pad=1.5)
 out2 = RESULTS_DIR / "chart_combinations.png"
