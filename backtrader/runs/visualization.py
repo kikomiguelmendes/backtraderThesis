@@ -17,7 +17,7 @@ LABEL_MAP = {
     "strategy_execution": "Strategy Execution",
 }
 
-BRAND = "#00338D"
+BRAND = "#37474F"  # dark blue-grey charcoal
 
 PALETTE = {
     "Strategy Execution": BRAND,
@@ -55,9 +55,6 @@ for bar, val in zip(bars, df["share_pct"]):
         fontweight="semibold",
         color=color,
     )
-
-ax.set_title("Where Does the Energy Go?", fontsize=14, fontweight="bold",
-             color=BRAND, pad=14, loc="left")
 
 ax.set_xlabel("Share of Total Energy (%)", fontsize=10, color="#555555", labelpad=8)
 ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{x:.0f}%"))
