@@ -48,7 +48,7 @@ for bar, val in zip(bars, df["share_pct"]):
     ax.text(
         label_x,
         bar.get_y() + bar.get_height() / 2,
-        f"{val:.1f}%",
+        f"{val:.2f}%",
         va="center",
         ha=ha,
         fontsize=11,
