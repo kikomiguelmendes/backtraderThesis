@@ -170,15 +170,17 @@ def compare_results(branches, results_base):
         if branch in rows:
             observed = rows[branch].get("pct_reduction_total", 0)
             diff = observed - expected
-            if abs(diff) < 0.5:
+            ratio = (observed / expected * 100) if expected != 0 else 0
+            if ratio >= 95:
                 effect = "additive"
-            elif diff > 0:
+            elif ratio > 100:
                 effect = "superadditive"
             else:
                 effect = "subadditive"
             rows[branch]["h3_expected_pct"] = round(expected, 4)
             rows[branch]["h3_observed_pct"] = round(observed, 4)
             rows[branch]["h3_difference_pct"] = round(diff, 4)
+            rows[branch]["h3_ratio_pct"] = round(ratio, 4)
             rows[branch]["h3_effect"] = effect
 
     comparison_path = os.path.join(results_base, "comparison.csv")
@@ -198,6 +200,7 @@ def compare_results(branches, results_base):
         "h3_expected_pct",
         "h3_observed_pct",
         "h3_difference_pct",
+        "h3_ratio_pct",
         "h3_effect",
     ]
     with open(comparison_path, "w", newline="") as f:
