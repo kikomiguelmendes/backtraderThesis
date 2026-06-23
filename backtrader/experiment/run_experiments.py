@@ -7,6 +7,14 @@ import argparse
 import subprocess
 import shutil
 import importlib.util
+import tempfile
+import datetime
+
+try:
+    import psutil
+except ImportError:
+    print("ERROR: psutil is required. Install with: pip install psutil")
+    sys.exit(1)
 
 """
 tutorial run:
@@ -20,9 +28,16 @@ DEFAULT_BENCHMARK = os.path.join(EXPERIMENT_DIR, "maxStressRun.py")
 RESULTS_BASE = os.path.join(EXPERIMENT_DIR, "results")
 
 COOLDOWN_S = 60
+IDLE_BASELINE_DURATION_S = 120
+CPU_CHECK_INTERVAL_S = 15
+CPU_LOAD_TOLERANCE = 10.0  # percentage points above idle baseline
+
+ENERGY_CSV_FIELDS = ["duration_s", "cpu_energy_kWh", "energy_consumed_kWh"]
+
 
 def git(args, **kwargs):
     return subprocess.run(["git"] + args, cwd=REPO_ROOT, check=True, **kwargs)
+
 
 def save_hardware_info(results_base):
     from codecarbon import EmissionsTracker
@@ -48,6 +63,7 @@ def save_hardware_info(results_base):
         f.write(f"cloud_region:      {d.cloud_region}\n")
     print(f"  Hardware info saved to {path}")
 
+
 def check_clean_tree():
     result = subprocess.run(
         ["git", "status", "--porcelain"],
@@ -58,6 +74,7 @@ def check_clean_tree():
         print(result.stdout)
         sys.exit(1)
 
+
 def load_benchmark_module(path):
     """Import benchmark file to read its N_RUNS constant."""
     spec = importlib.util.spec_from_file_location("benchmark", path)
@@ -65,9 +82,10 @@ def load_benchmark_module(path):
     spec.loader.exec_module(mod)
     return mod
 
+
 def save_run_order(run_list, seed, results_base):
     path = os.path.join(results_base, "run_order.csv")
-    
+
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["seed", seed])
@@ -78,27 +96,116 @@ def save_run_order(run_list, seed, results_base):
     print(f"  Run order saved to {path}  (seed={seed})")
 
 
-def run_single(branch, benchmark, out_dir):
+def _log(results_base, branch, run_idx, message):
+    """Append one entry to the branch error log, flushed immediately."""
+    log_path = os.path.join(results_base, branch, "experiment_errors.log")
+    timestamp = datetime.datetime.now().isoformat(timespec="seconds")
+    with open(log_path, "a") as f:
+        f.write(f"[{timestamp}] branch={branch} run={run_idx}: {message}\n")
+
+
+def measure_idle_cpu():
+    """Block for IDLE_BASELINE_DURATION_S seconds and return average CPU load."""
+    print(f"Measuring idle CPU baseline over {IDLE_BASELINE_DURATION_S}s...")
+    baseline = psutil.cpu_percent(interval=IDLE_BASELINE_DURATION_S)
+    print(f"  Idle CPU baseline: {baseline:.1f}%")
+    return baseline
+
+
+def wait_for_cpu(idle_baseline, results_base, branch, run_idx):
+    """
+    Block until CPU load is within CPU_LOAD_TOLERANCE percentage points of
+    idle_baseline. Rechecks every CPU_CHECK_INTERVAL_S seconds. Logs to the
+    branch error log if any waiting was necessary.
+    """
+    wait_start = time.monotonic()
+    had_to_wait = False
+
+    while True:
+        current = psutil.cpu_percent(interval=1)  # 1-second blocking measurement
+        if current <= idle_baseline + CPU_LOAD_TOLERANCE:
+            if had_to_wait:
+                elapsed = time.monotonic() - wait_start
+                msg = (
+                    f"CPU load settled to {current:.1f}% after {elapsed:.0f}s "
+                    f"(baseline={idle_baseline:.1f}%, tolerance=+{CPU_LOAD_TOLERANCE}%)"
+                )
+                print(f"  {msg}")
+                _log(results_base, branch, run_idx, f"CPU wait resolved: {msg}")
+            return
+
+        if not had_to_wait:
+            had_to_wait = True
+            print(
+                f"  CPU load {current:.1f}% exceeds idle baseline "
+                f"{idle_baseline:.1f}% + {CPU_LOAD_TOLERANCE}%. Waiting..."
+            )
+        # cpu_percent(interval=1) already consumed 1s; sleep the remainder
+        time.sleep(CPU_CHECK_INTERVAL_S - 1)
+
+
+def run_single(branch, benchmark, results_base, run_idx, idle_baseline):
+    """
+    Run the benchmark once for the given branch. Each attempt uses a fresh
+    temp directory so that a failed run cannot leave a partial CSV row. Returns
+    a dict with the energy row on success, or raises after all retries.
+    """
     git(["checkout", branch])
-    env = {**os.environ, "BT_OUTPUT_DIR": out_dir}
-    
+
     max_retries = 3
     for attempt in range(max_retries):
+        wait_for_cpu(idle_baseline, results_base, branch, run_idx)
+
+        tmp_dir = tempfile.mkdtemp(prefix=f"bt_{branch}_{run_idx}_")
         try:
+            env = {**os.environ, "BT_OUTPUT_DIR": tmp_dir}
             subprocess.run(
                 [sys.executable, benchmark],
                 env=env,
                 cwd=REPO_ROOT,
                 check=True,
             )
-            return
-        except subprocess.CalledProcessError as e:
+
+            csv_path = os.path.join(tmp_dir, "energy_runnext.csv")
+            with open(csv_path, newline="") as f:
+                rows = list(csv.DictReader(f))
+
+            if not rows:
+                raise ValueError("energy_runnext.csv is empty after completed run")
+
+            return rows[-1]
+
+        except (subprocess.CalledProcessError, ValueError, OSError) as exc:
+            error_msg = str(exc)
+            _log(results_base, branch, run_idx, f"Run failed: {error_msg}")
+
             if attempt < max_retries - 1:
-                print(f"  Run failed with {e}, retrying in 30s... (attempt {attempt + 1}/{max_retries})")
+                retry_note = f"attempt {attempt + 1}/{max_retries}, retrying in 30s"
+                print(f"  Run failed ({error_msg}), {retry_note}")
+                _log(results_base, branch, run_idx, f"Retry: {retry_note}")
                 time.sleep(30)
             else:
                 print(f"  Run failed after {max_retries} attempts, skipping.")
                 raise
+
+        finally:
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+
+
+def write_accumulated_results(accumulated, results_base):
+    """Write in-memory results to per-branch energy_runnext.csv files."""
+    print("\nWriting accumulated energy data...")
+    for branch, rows in accumulated.items():
+        if not rows:
+            print(f"  WARNING: no rows accumulated for branch '{branch}', skipping write")
+            continue
+        out_path = os.path.join(results_base, branch, "energy_runnext.csv")
+        with open(out_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=ENERGY_CSV_FIELDS, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
+        print(f"  Wrote {len(rows)} rows to {out_path}")
+
 
 def analyze_branch(branch, benchmark, results_base):
     out_dir = os.path.join(results_base, branch)
@@ -112,11 +219,12 @@ def analyze_branch(branch, benchmark, results_base):
 
     analysis_script = os.path.join(os.path.dirname(benchmark), "analyze_energy.py")
     cmd = [sys.executable, analysis_script, "--input", runnext_file, "--output", summary_file]
-    
+
     if branch != "baseline" and os.path.exists(baseline_file):
         cmd += ["--baseline", baseline_file]
-    
+
     subprocess.run(cmd, check=True)
+
 
 def compare_results(branches, results_base):
     rows = {}
@@ -209,7 +317,8 @@ def compare_results(branches, results_base):
         writer.writerows(rows.values())
 
     print(f"Comparison written to {comparison_path}")
-    
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run benchmarks across all architecture branches."
@@ -229,7 +338,7 @@ def main():
     )
     args = parser.parse_args()
 
-    check_clean_tree() # stop with uncommited changes
+    check_clean_tree()
 
     benchmark_mod = load_benchmark_module(args.benchmark)
     n_runs = benchmark_mod.N_RUNS
@@ -240,6 +349,9 @@ def main():
     print(f"Runs per branch:       {n_runs}  (total: {total}, shuffled)")
     print(f"Cooldown between runs: {COOLDOWN_S}s")
     print(f"Results directory:     {RESULTS_BASE}\n")
+
+    # Measure idle CPU before any experiment work begins
+    idle_baseline = measure_idle_cpu()
 
     # Clean up stale results from previous runs
     for branch in args.branches:
@@ -278,18 +390,26 @@ def main():
     random.shuffle(run_list)
     save_run_order(run_list, seed, RESULTS_BASE)
 
+    # Accumulate all energy rows in memory; nothing is written to the final
+    # CSV until every run has completed successfully.
+    accumulated = {branch: [] for branch in args.branches}
+
     for i, (branch, run_idx) in enumerate(run_list, 1):
-        out_dir = os.path.join(RESULTS_BASE, branch)
         print(f"\n{'=' * 60}")
         print(f"  [{i}/{total}]  branch={branch}  run={run_idx}")
         print(f"{'=' * 60}")
-        run_single(branch, args.benchmark, out_dir)
+
+        row = run_single(branch, args.benchmark, RESULTS_BASE, run_idx, idle_baseline)
+        accumulated[branch].append(row)
 
         if i < total:
             print(f"  Cooldown {COOLDOWN_S}s...")
             time.sleep(COOLDOWN_S)
 
     git(["checkout", origin_branch])
+
+    # All runs succeeded — flush the complete CSVs now
+    write_accumulated_results(accumulated, RESULTS_BASE)
 
     print("\nAll runs done. Running per-branch energy analysis...")
     for branch in args.branches:
@@ -298,6 +418,7 @@ def main():
 
     print("\nGenerating cross-branch comparison...")
     compare_results(args.branches, RESULTS_BASE)
+
 
 if __name__ == "__main__":
     main()
