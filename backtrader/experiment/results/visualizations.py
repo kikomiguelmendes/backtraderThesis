@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
@@ -31,26 +30,40 @@ BRANCH_LABELS = {
 df = pd.read_csv(CSV_PATH).set_index("branch")
 
 
+def _fmt_p(p):
+    if p < 0.001:
+        return "p<0.001"
+    return f"p={p:.3f}"
+
+
+def _is_ns(branch):
+    return str(df.loc[branch, "h2_rejected_total"]).strip().lower() != "true"
+
+
+def _sig_label(branch):
+    p = df.loc[branch, "p_total"]
+    word = "not significant" if _is_ns(branch) else "significant"
+    return f"{_fmt_p(p)}, {word}"
+
+
 # ---------------------------------------------------------------------------
 # Chart 1 — Individual branch energy reduction
 # ---------------------------------------------------------------------------
 
 ind_rows = ["changes_1", "changes_2", "changes_3"]
-sig_labels = {
-    "changes_1": "p=0.031, significant",
-    "changes_2": "p<0.001, significant",
-    "changes_3": "p=0.145, not significant",
-}
 
 ind = df.loc[ind_rows, ["pct_reduction_total"]].copy()
 ind["label"] = [BRANCH_LABELS[b] for b in ind.index]
-ind["sig"]   = [sig_labels[b]   for b in ind.index]
+ind["sig"]   = [_sig_label(b)   for b in ind.index]
+ind["is_ns"] = [_is_ns(b)       for b in ind.index]
 ind = ind.sort_values("pct_reduction_total", ascending=True)
+
+max_ind_pct = ind["pct_reduction_total"].max()
 
 fig1, ax1 = plt.subplots(figsize=(9, 3.8))
 
 for i, (branch, row) in enumerate(ind.iterrows()):
-    is_ns = branch == "changes_3"
+    is_ns = row["is_ns"]
     color = GREY if is_ns else BRAND
     lw    = 1.4  if is_ns else 0
     ls    = "--"  if is_ns else "-"
@@ -72,7 +85,7 @@ for i, (branch, row) in enumerate(ind.iterrows()):
              fontsize=10.5, fontweight="semibold", color=val_color)
 
     sig      = row["sig"]
-    sig_x    = val + 0.5  if inside else 3.2
+    sig_x    = val + 0.5  if inside else max_ind_pct * 0.18
     sig_color = "#888888" if is_ns  else "#37474F"
     ax1.text(sig_x, i, sig, va="center", ha="left", fontsize=8.5,
              color=sig_color, style="italic" if is_ns else "normal")
@@ -82,7 +95,7 @@ ax1.axvline(x=0, color="#888888", linewidth=0.9, linestyle="--", zorder=0)
 ax1.set_xlabel("Energy Reduction (%)", fontsize=10, color="#555555", labelpad=8)
 ax1.set_title("Total Energy Reduction by Technique (% vs Baseline)",
               fontsize=12, color="#1A1A1A", pad=12, fontweight="semibold")
-ax1.set_xlim(0, 22)
+ax1.set_xlim(0, max_ind_pct + 8)
 ax1.tick_params(axis="y", length=0, labelsize=11, colors="#1A1A1A")
 ax1.tick_params(axis="x", length=3, labelsize=9,  colors="#888888")
 ax1.spines["top"].set_visible(False)
@@ -119,6 +132,8 @@ comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct", "h3_effect"]
 comb["label"] = [BRANCH_LABELS[b] for b in comb.index]
 comb = comb.sort_values("pct_reduction_total", ascending=True)
 
+max_comb_pct = max(comb["pct_reduction_total"].max(), comb["h3_expected_pct"].max())
+
 fig2, ax2 = plt.subplots(figsize=(10, 4.2))
 
 yticks = list(range(len(comb)))
@@ -150,7 +165,7 @@ for i, (_, row) in enumerate(comb.iterrows()):
         ax2.text(-0.2, i, f"{obs:.1f}%", va="center", ha="right",
                  fontsize=10, fontweight="semibold", color="#1A1A1A")
 
-    ax2.text(21.8, i, EFFECT_LABELS[effect], va="center", ha="right",
+    ax2.text(max_comb_pct + 3.5, i, EFFECT_LABELS[effect], va="center", ha="right",
              fontsize=8.5, color=EFFECT_COLORS[effect], style="italic")
 
 ax2.set_yticks(yticks)
@@ -159,7 +174,7 @@ ax2.set_yticklabels(comb["label"].values, fontsize=10.5)
 ax2.set_xlabel("Energy Reduction (%)", fontsize=10, color="#555555", labelpad=8)
 ax2.set_title("Observed vs Expected Additive Reduction (% vs Baseline)",
               fontsize=12, color="#1A1A1A", pad=12, fontweight="semibold")
-ax2.set_xlim(-1.5, 22)
+ax2.set_xlim(-1.5, max_comb_pct + 5)
 ax2.tick_params(axis="y", length=0, colors="#1A1A1A")
 ax2.tick_params(axis="x", length=3, labelsize=9, colors="#888888")
 ax2.spines["top"].set_visible(False)
@@ -194,6 +209,8 @@ abso["label"]         = [BRANCH_LABELS[b] for b in abso.index]
 abso["pct_reduction"] = df.loc[all_rows, "pct_reduction_total"].fillna(0.0)
 # sort ascending so highest energy (baseline) ends up at top of barh
 abso = abso.sort_values("mean_total_energy_J", ascending=True)
+
+max_abso_J = (abso["mean_total_energy_J"] + abso["std_total_energy_J"]).max()
 
 BASELINE_CLR = "#90A4AE"   # distinct cool blue-grey for baseline
 ALPHA_MIN, ALPHA_MAX = 0.30, 1.00
@@ -234,7 +251,7 @@ for i, (branch, row) in enumerate(abso.iterrows()):
 ax3.set_xlabel("Total Energy (J)", fontsize=10, color="#555555", labelpad=8)
 ax3.set_title("Mean Total Energy Consumption per Branch (J)",
               fontsize=12, color="#1A1A1A", pad=12, fontweight="semibold")
-ax3.set_xlim(0, 840)
+ax3.set_xlim(0, max_abso_J * 1.18)
 ax3.tick_params(axis="y", length=0, labelsize=10, colors="#1A1A1A")
 ax3.tick_params(axis="x", length=3, labelsize=9,  colors="#888888")
 ax3.spines["top"].set_visible(False)
