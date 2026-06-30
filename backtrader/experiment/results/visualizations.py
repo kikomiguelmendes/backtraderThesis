@@ -11,10 +11,11 @@ matplotlib.rcParams["font.sans-serif"] = ["Helvetica Neue", "Helvetica", "Arial"
 RESULTS_DIR = Path(__file__).resolve().parent
 CSV_PATH    = RESULTS_DIR / "comparison.csv"
 
-BRAND  = "#37474F"   # dark blue-grey
-GREY   = "#AAAAAA"
-ORANGE = "#D95F02"   # warm orange for expected marker
-BAR_H  = 0.52
+BRAND        = "#37474F"   # dark blue-grey
+GREY         = "#AAAAAA"
+ORANGE       = "#D95F02"   # warm orange for expected marker
+BASELINE_CLR = "#90A4AE"   # distinct cool blue-grey for baseline
+BAR_H        = 0.52
 
 BRANCH_LABELS = {
     "baseline":      "Baseline",
@@ -45,18 +46,14 @@ def _sig_label(branch):
     word = "not significant" if _is_ns(branch) else "significant"
     return f"{_fmt_p(p)}, {word}"
 
-
-# ---------------------------------------------------------------------------
 # Chart 1 — Individual branch energy reduction
-# ---------------------------------------------------------------------------
 
-ind_rows = ["changes_1", "changes_2", "changes_3"]
+ind_rows = ["changes_3", "changes_2", "changes_1"]
 
 ind = df.loc[ind_rows, ["pct_reduction_total"]].copy()
 ind["label"] = [BRANCH_LABELS[b] for b in ind.index]
-ind["sig"]   = [_sig_label(b)   for b in ind.index]
-ind["is_ns"] = [_is_ns(b)       for b in ind.index]
-ind = ind.sort_values("pct_reduction_total", ascending=True)
+ind["sig"]   = [_sig_label(b) for b in ind.index]
+ind["is_ns"] = [_is_ns(b)     for b in ind.index]
 
 max_ind_pct = ind["pct_reduction_total"].max()
 
@@ -65,8 +62,8 @@ fig1, ax1 = plt.subplots(figsize=(9, 3.8))
 for i, (branch, row) in enumerate(ind.iterrows()):
     is_ns = row["is_ns"]
     color = GREY if is_ns else BRAND
-    lw    = 1.4  if is_ns else 0
-    ls    = "--"  if is_ns else "-"
+    lw    = 1.4 if is_ns else 0
+    ls    = "--" if is_ns else "-"
 
     ax1.barh(
         row["label"], row["pct_reduction_total"],
@@ -110,12 +107,9 @@ out1 = RESULTS_DIR / "chart_individual_branches.png"
 fig1.savefig(out1, dpi=300, bbox_inches="tight", facecolor="white")
 print(f"Saved → {out1}")
 
-
-# ---------------------------------------------------------------------------
 # Chart 2 — Combination results with additivity comparison
-# ---------------------------------------------------------------------------
 
-comb_rows = ["changes_1_2", "changes_1_3", "changes_2_3", "changes_1_2_3"]
+comb_rows = ["changes_1_2_3", "changes_2_3", "changes_1_3", "changes_1_2"]
 
 EFFECT_COLORS = {
     "additive":      "#37474F",
@@ -130,7 +124,6 @@ EFFECT_LABELS = {
 
 comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct", "h3_effect"]].copy()
 comb["label"] = [BRANCH_LABELS[b] for b in comb.index]
-comb = comb.sort_values("pct_reduction_total", ascending=True)
 
 max_comb_pct = max(comb["pct_reduction_total"].max(), comb["h3_expected_pct"].max())
 
@@ -196,23 +189,17 @@ out2 = RESULTS_DIR / "chart_combinations.png"
 fig2.savefig(out2, dpi=300, bbox_inches="tight", facecolor="white")
 print(f"Saved → {out2}")
 
-
-# ---------------------------------------------------------------------------
 # Chart 3 — All branches absolute energy with uncertainty
-# ---------------------------------------------------------------------------
 
-all_rows = ["baseline", "changes_1", "changes_2", "changes_3",
-            "changes_1_2", "changes_1_3", "changes_2_3", "changes_1_2_3"]
+all_rows = ["changes_1_2_3", "changes_2_3", "changes_1_3", "changes_1_2",
+            "changes_3", "changes_2", "changes_1", "baseline"]
 
 abso = df.loc[all_rows, ["mean_total_energy_J", "std_total_energy_J"]].copy()
 abso["label"]         = [BRANCH_LABELS[b] for b in abso.index]
 abso["pct_reduction"] = df.loc[all_rows, "pct_reduction_total"].fillna(0.0)
-# sort ascending so highest energy (baseline) ends up at top of barh
-abso = abso.sort_values("mean_total_energy_J", ascending=True)
 
 max_abso_J = (abso["mean_total_energy_J"] + abso["std_total_energy_J"]).max()
 
-BASELINE_CLR = "#90A4AE"   # distinct cool blue-grey for baseline
 ALPHA_MIN, ALPHA_MAX = 0.30, 1.00
 
 non_bl = abso[abso.index != "baseline"]["pct_reduction"]
