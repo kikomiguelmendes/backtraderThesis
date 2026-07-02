@@ -3,12 +3,16 @@ import sys
 import csv
 import time
 import random
+import re
+import math
 import argparse
 import subprocess
 import shutil
 import importlib.util
 import tempfile
 import datetime
+
+from scipy.stats import t as t_dist
 
 try:
     import psutil
@@ -226,6 +230,27 @@ def analyze_branch(branch, benchmark, results_base):
     subprocess.run(cmd, check=True)
 
 
+def _individual_branches(branch):
+    """
+    Return the individual branch names making up a combination branch, e.g.
+    'changes_1_2_3' -> ['changes_1', 'changes_2', 'changes_3']. Returns []
+    for 'baseline' or any branch that isn't a multi-index combination.
+    """
+    if not re.fullmatch(r"changes(_\d+)+", branch):
+        return []
+    indices = branch.split("_")[1:]
+    if len(indices) < 2:
+        return []
+    return [f"changes_{i}" for i in indices]
+
+
+def _count_runs(results_base, branch):
+    """Number of runs for a branch, counted from its energy_runnext.csv."""
+    path = os.path.join(results_base, branch, "energy_runnext.csv")
+    with open(path, newline="") as f:
+        return sum(1 for _ in csv.reader(f)) - 1  # minus header row
+
+
 def compare_results(branches, results_base):
     rows = {}
     for branch in branches:
@@ -257,39 +282,72 @@ def compare_results(branches, results_base):
                 elif key == "h2_rejected":
                     summary["h2_rejected_cpu"] = row[1]
                     summary["h2_rejected_total"] = row[2]
+        summary["n"] = _count_runs(results_base, branch)
         rows[branch] = summary
 
     if not rows:
         print("No results to compare.")
         return
 
-    b1 = rows.get("changes_1", {}).get("pct_reduction_total", 0)
-    b2 = rows.get("changes_2", {}).get("pct_reduction_total", 0)
-    b3 = rows.get("changes_3", {}).get("pct_reduction_total", 0)
+    for branch in rows:
+        individuals = _individual_branches(branch)
+        if not individuals or "baseline" not in rows:
+            continue
+        if not all(ind in rows for ind in individuals):
+            continue
 
-    combinations = {
-        "changes_1_2":   b1 + b2,
-        "changes_1_3":   b1 + b3,
-        "changes_2_3":   b2 + b3,
-        "changes_1_2_3": b1 + b2 + b3,
-    }
+        combo = rows[branch]
+        base = rows["baseline"]
+        indiv_rows = [rows[ind] for ind in individuals]
+        k = len(individuals)
 
-    for branch, expected in combinations.items():
-        if branch in rows:
-            observed = rows[branch].get("pct_reduction_total", 0)
-            diff = observed - expected
-            ratio = (observed / expected * 100) if expected != 0 else 0
-            if ratio >= 95:
-                effect = "additive"
-            elif ratio > 100:
-                effect = "superadditive"
-            else:
-                effect = "subadditive"
-            rows[branch]["h3_expected_pct"] = round(expected, 4)
-            rows[branch]["h3_observed_pct"] = round(observed, 4)
-            rows[branch]["h3_difference_pct"] = round(diff, 4)
-            rows[branch]["h3_ratio_pct"] = round(ratio, 4)
-            rows[branch]["h3_effect"] = effect
+        expected = sum(r.get("pct_reduction_total", 0) for r in indiv_rows)
+        observed = combo.get("pct_reduction_total", 0)
+
+        baseline_coef = -(k - 1)
+        delta = (
+            sum(r["mean_total_energy_J"] for r in indiv_rows)
+            + baseline_coef * base["mean_total_energy_J"]
+            - combo["mean_total_energy_J"]
+        )
+
+        # Independent sample means -> variances add, no covariance terms.
+        # Baseline enters delta with coefficient baseline_coef, so error
+        # propagation weights its variance term by baseline_coef ** 2.
+        var_terms = [combo["std_total_energy_J"] ** 2 / combo["n"]]
+        df_denoms = [combo["n"] - 1]
+        for r in indiv_rows:
+            var_terms.append(r["std_total_energy_J"] ** 2 / r["n"])
+            df_denoms.append(r["n"] - 1)
+        var_terms.append(baseline_coef ** 2 * base["std_total_energy_J"] ** 2 / base["n"])
+        df_denoms.append(base["n"] - 1)
+
+        var_delta = sum(var_terms)
+        se = math.sqrt(var_delta)
+
+        # Welch-Satterthwaite approximation for degrees of freedom.
+        dof = var_delta ** 2 / sum(v ** 2 / d for v, d in zip(var_terms, df_denoms))
+
+        t_crit = t_dist.ppf(0.975, dof)
+        ci_lower = delta - t_crit * se
+        ci_upper = delta + t_crit * se
+
+        if ci_lower <= 0 <= ci_upper:
+            classification = "Additive"
+        elif ci_lower > 0:
+            classification = "Super-additive"
+        else:
+            classification = "Sub-additive"
+
+        rows[branch]["h3_expected_pct"] = round(expected, 4)
+        rows[branch]["h3_observed_pct"] = round(observed, 4)
+        rows[branch]["h3_difference_pct"] = round(observed - expected, 4)
+        rows[branch]["h3_delta_J"] = round(delta, 6)
+        rows[branch]["h3_se_J"] = round(se, 6)
+        rows[branch]["h3_ci_lower_J"] = round(ci_lower, 6)
+        rows[branch]["h3_ci_upper_J"] = round(ci_upper, 6)
+        rows[branch]["h3_df"] = round(dof, 3)
+        rows[branch]["h3_classification"] = classification
 
     comparison_path = os.path.join(results_base, "comparison.csv")
     fieldnames = [
@@ -308,8 +366,12 @@ def compare_results(branches, results_base):
         "h3_expected_pct",
         "h3_observed_pct",
         "h3_difference_pct",
-        "h3_ratio_pct",
-        "h3_effect",
+        "h3_delta_J",
+        "h3_se_J",
+        "h3_ci_lower_J",
+        "h3_ci_upper_J",
+        "h3_df",
+        "h3_classification",
     ]
     with open(comparison_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")

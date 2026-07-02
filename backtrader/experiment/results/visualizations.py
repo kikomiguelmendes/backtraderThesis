@@ -112,17 +112,17 @@ print(f"Saved → {out1}")
 comb_rows = ["changes_1_2_3", "changes_2_3", "changes_1_3", "changes_1_2"]
 
 EFFECT_COLORS = {
-    "additive":      "#37474F",
-    "subadditive":   "#B85C00",
-    "superadditive": "#6A2A6A",
+    "Additive":      "#37474F",
+    "Sub-additive":  "#B85C00",
+    "Super-additive": "#6A2A6A",
 }
 EFFECT_LABELS = {
-    "additive":      "additive",
-    "subadditive":   "sub-additive",
-    "superadditive": "super-additive",
+    "Additive":      "additive",
+    "Sub-additive":  "sub-additive",
+    "Super-additive": "super-additive",
 }
 
-comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct", "h3_effect"]].copy()
+comb = df.loc[comb_rows, ["pct_reduction_total", "h3_expected_pct", "h3_classification"]].copy()
 comb["label"] = [BRANCH_LABELS[b] for b in comb.index]
 
 max_comb_pct = max(comb["pct_reduction_total"].max(), comb["h3_expected_pct"].max())
@@ -148,7 +148,7 @@ ax2.barh(
 
 for i, (_, row) in enumerate(comb.iterrows()):
     obs    = row["pct_reduction_total"]
-    effect = row["h3_effect"]
+    effect = row["h3_classification"]
 
     inside = obs > 5
     if inside:
@@ -189,74 +189,51 @@ out2 = RESULTS_DIR / "chart_combinations.png"
 fig2.savefig(out2, dpi=300, bbox_inches="tight", facecolor="white")
 print(f"Saved → {out2}")
 
-# Chart 3 — All branches absolute energy with uncertainty
+# Chart 3 — RQ3 interaction effect: delta (J) with 95% CI
 
-all_rows = ["changes_1_2_3", "changes_2_3", "changes_1_3", "changes_1_2",
-            "changes_3", "changes_2", "changes_1", "baseline"]
+delta_rows = ["changes_1_2_3", "changes_2_3", "changes_1_3", "changes_1_2"]
 
-abso = df.loc[all_rows, ["mean_total_energy_J", "std_total_energy_J"]].copy()
-abso["label"]         = [BRANCH_LABELS[b] for b in abso.index]
-abso["pct_reduction"] = df.loc[all_rows, "pct_reduction_total"].fillna(0.0)
+delta_df = df.loc[delta_rows, ["h3_delta_J", "h3_ci_lower_J", "h3_ci_upper_J", "h3_classification"]].copy()
+delta_df["label"] = [BRANCH_LABELS[b] for b in delta_df.index]
 
-max_abso_J = (abso["mean_total_energy_J"] + abso["std_total_energy_J"]).max()
+fig4, ax4 = plt.subplots(figsize=(9, 3.8))
 
-ALPHA_MIN, ALPHA_MAX = 0.30, 1.00
+yticks4 = list(range(len(delta_df)))
 
-non_bl = abso[abso.index != "baseline"]["pct_reduction"]
-red_min, red_max = non_bl.min(), non_bl.max()
+for i, (_, row) in enumerate(delta_df.iterrows()):
+    delta = row["h3_delta_J"]
+    lo, hi = row["h3_ci_lower_J"], row["h3_ci_upper_J"]
+    cls = row["h3_classification"]
+    color = EFFECT_COLORS.get(cls, GREY)
 
-def reduction_alpha(pct):
-    if red_max > red_min:
-        return ALPHA_MIN + (ALPHA_MAX - ALPHA_MIN) * (pct - red_min) / (red_max - red_min)
-    return ALPHA_MAX
-
-def bar_rgba(branch, pct):
-    if branch == "baseline":
-        return mcolors.to_rgba(BASELINE_CLR, alpha=1.0)
-    return mcolors.to_rgba(BRAND, alpha=reduction_alpha(pct))
-
-fig3, ax3 = plt.subplots(figsize=(10, 5.2))
-
-for i, (branch, row) in enumerate(abso.iterrows()):
-    rgba  = bar_rgba(branch, row["pct_reduction"])
-    xerr  = row["std_total_energy_J"]
-    mean  = row["mean_total_energy_J"]
-
-    ax3.barh(
-        row["label"], mean,
-        height=BAR_H,
-        color=rgba,
-        edgecolor="none",
-        xerr=xerr,
-        error_kw={"elinewidth": 1.2, "ecolor": "#888888", "capsize": 3},
-        zorder=2,
+    ax4.errorbar(
+        delta, i, xerr=[[delta - lo], [hi - delta]],
+        fmt="o", color=color, ecolor=color,
+        elinewidth=1.6, capsize=4, markersize=6, zorder=3,
     )
+    ax4.text(hi + 1, i, f"{EFFECT_LABELS.get(cls, cls)}  (Δ={delta:.2f} J)",
+             va="center", ha="left", fontsize=8.5, color=color, style="italic")
 
-    ax3.text(mean + xerr + 4, i, f"{mean:.1f} J",
-             va="center", ha="left", fontsize=9, color="#1A1A1A")
-
-ax3.set_xlabel("Total Energy (J)", fontsize=10, color="#555555", labelpad=8)
-ax3.set_title("Mean Total Energy Consumption per Branch (J)",
+ax4.axvline(x=0, color="#888888", linewidth=0.9, linestyle="--", zorder=0)
+ax4.set_yticks(yticks4)
+ax4.set_yticklabels(delta_df["label"].values, fontsize=10.5)
+ax4.set_xlabel("Interaction effect Δ (J), 95% CI   [+ = super-additive, − = sub-additive]",
+               fontsize=9.5, color="#555555", labelpad=8)
+ax4.set_title("RQ3 — Interaction Effect on Total Energy (Δ = Expected − Observed Combo Mean)",
               fontsize=12, color="#1A1A1A", pad=12, fontweight="semibold")
-ax3.set_xlim(0, max_abso_J * 1.18)
-ax3.tick_params(axis="y", length=0, labelsize=10, colors="#1A1A1A")
-ax3.tick_params(axis="x", length=3, labelsize=9,  colors="#888888")
-ax3.spines["top"].set_visible(False)
-ax3.spines["right"].set_visible(False)
-ax3.spines["left"].set_visible(False)
-ax3.spines["bottom"].set_color("#CCCCCC")
-ax3.xaxis.grid(False)
-ax3.yaxis.grid(False)
+ax4.tick_params(axis="y", length=0, colors="#1A1A1A")
+ax4.tick_params(axis="x", length=3, labelsize=9, colors="#888888")
+ax4.spines["top"].set_visible(False)
+ax4.spines["right"].set_visible(False)
+ax4.spines["left"].set_visible(False)
+ax4.spines["bottom"].set_color("#CCCCCC")
+ax4.xaxis.grid(False)
+ax4.yaxis.grid(False)
 
-baseline_patch = mpatches.Patch(color=BASELINE_CLR, label="Baseline")
-lo_patch = mpatches.Patch(color=mcolors.to_rgba(BRAND, alpha=ALPHA_MIN),
-                           label="Lower reduction (lighter)")
-hi_patch = mpatches.Patch(color=mcolors.to_rgba(BRAND, alpha=ALPHA_MAX),
-                           label="Higher reduction (darker)")
-ax3.legend(handles=[baseline_patch, lo_patch, hi_patch],
-           frameon=False, fontsize=9, loc="lower right")
+xmax = max(abs(delta_df["h3_ci_lower_J"].min()), abs(delta_df["h3_ci_upper_J"].max())) * 1.7
+ax4.set_xlim(-xmax, xmax)
 
-fig3.tight_layout(pad=1.5)
-out3 = RESULTS_DIR / "chart_all_branches_absolute.png"
-fig3.savefig(out3, dpi=300, bbox_inches="tight", facecolor="white")
-print(f"Saved → {out3}")
+fig4.tight_layout(pad=1.5)
+out4 = RESULTS_DIR / "chart_combinations.png"
+fig4.savefig(out4, dpi=300, bbox_inches="tight", facecolor="white")
+print(f"Saved → {out4}")
